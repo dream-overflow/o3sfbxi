@@ -1,0 +1,11 @@
+CMakeLists.txt
+LICENSE.md
+README.md
+src/o3s/plugins/fbxi/fbxnode.cpp
+src/o3s/plugins/fbxi/fbxnode.h
+src/o3s/plugins/fbxi/importer.cpp
+src/o3s/plugins/fbxi/importer.h
+src/o3s/plugins/fbxi/parser.cpp
+src/o3s/plugins/fbxi/parser.h
+src/o3s/plugins/fbxi/plugin.cpp
+src/o3s/plugins/fbxi/plugin.h
