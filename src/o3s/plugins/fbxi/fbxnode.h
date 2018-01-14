@@ -22,9 +22,16 @@ public:
     FBXNode(const String &name);
     virtual ~FBXNode();
 
+    const String& name() const;
+
+    void addChild(FBXNode *child);
+    FBXNode *child(const String &name);
+
 protected:
 
-    String name;
+    String m_name;
+
+    std::list<FBXNode*> m_nodes;
 };
 
 } // namespace fbxi
