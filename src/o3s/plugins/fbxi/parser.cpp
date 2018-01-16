@@ -11,6 +11,12 @@
 
 #include <o3d/core/debug.h>
 
+#ifdef _MSC_VER
+    #include <zlib/zlib.h>
+#else
+    #include <zlib.h>
+#endif
+
 using namespace o3d::studio::fbxi;
 
 Parser::Parser(o3d::InStream *stream) :
@@ -63,7 +69,11 @@ o3d::Bool Parser::parse()
 o3d::Bool Parser::parseBinary7300()
 {
     // parse the root node (present in binary mode, not in ascii)
-    parseNodeBinary7300(nullptr);
+    while (!m_stream.isEnd()) {
+        if (!parseNodeBinary7300(nullptr)) {
+            break;
+        }
+    }
 
     return True;
 }
@@ -71,17 +81,22 @@ o3d::Bool Parser::parseBinary7300()
 o3d::Bool Parser::parseBinary7400()
 {
     // parse the root node (present in binary mode, not in ascii)
-    parseNodeBinary7400(nullptr);
+    while (!m_stream.isEnd()) {
+        if (!parseNodeBinary7400(nullptr)) {
+            break;
+        }
+    }
 
     return True;
 }
 
-void Parser::parseNodeBinary7300(FBXNode *parent)
+o3d::Bool Parser::parseNodeBinary7300(FBXNode *parent)
 {
     // @todo
+    return False;
 }
 
-void Parser::parseNodeBinary7400(FBXNode *parent)
+o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
 {
     UInt32 endOfs, numProps, propListLen;
     String name;
@@ -93,27 +108,111 @@ void Parser::parseNodeBinary7400(FBXNode *parent)
     name = readString();
 
     FBXNode *node = new FBXNode(name);
-    m_nodes.push_back(node);
+    System::print(name, String("props:").arg(numProps));
+
+    // end of document reached
+    if (!endOfs && !numProps && !propListLen) {
+        return False;
+    }
+
+    if (name == "Properties70") {
+        printf("toto\n");
+    }
 
     if (parent) {
         parent->addChild(node);
+    } else {
+        m_nodes.push_back(node);
     }
 
     // node->setProperty
     // FBXHeaderExtension
 
+    Int8 propType;
+    Int8 b;
+    Int16 si16;
+    Int32 si32;
+    Int64 si64;
+    Float float32;
+    Double double64;
+
     for (UInt32 i = 0; i < numProps; ++i) {
-        // @todo
+        m_stream >> propType;
+
+        switch (propType) {
+            case 'Y':
+                m_stream >> si16;
+                break;
+            case 'C':
+                m_stream >> b;
+                break;
+            case 'I':
+                m_stream >> si32;
+                break;
+            case 'F':
+                m_stream >> float32;
+                break;
+            case 'D':
+                m_stream >> double64;
+                break;
+            case 'L':
+                m_stream >> si64;
+                break;
+
+            case 'f':
+            {
+                SmartArrayFloat arrF = readFloatArray();
+            }
+                break;
+            case 'd':
+            {
+                SmartArrayDouble arrD = readDoubleArray();
+            }
+                break;
+            case 'l':
+            {
+                SmartArrayInt64 arrI64 = readInt64Array();
+            }
+                break;
+            case 'i':
+            {
+                SmartArrayInt32 arrI32 = readInt32Array();
+            }
+                break;
+            case 'b':
+            {
+                SmartArrayUInt8 arrB = readBoolArray();
+            }
+                break;
+
+            case 'S':
+            {
+                String str = readStringProp();
+            }
+                break;
+            case 'R':
+            {
+                SmartArrayUInt8 raw = readUInt8RawProp();
+            }
+                break;
+
+            default:
+                O3D_ERROR(E_InvalidFormat("Unknown property type"));
+        }
     }
 
     // nested properties
     if (m_stream.getPosition() < endOfs) {
-        // @todo
+        while (m_stream.getPosition() + 13 < endOfs) {
+            parseNodeBinary7400(node);
+        }
 
-        // present when nested properties only
+        // node terminating 13 null bytes
         UInt8 emptyBytes[13] = {0};
         m_stream.read(emptyBytes, 13);
     }
+
+    return True;
 }
 
 o3d::String Parser::readString()
@@ -126,4 +225,201 @@ o3d::String Parser::readString()
     data[len] = 0;
 
     return data;
+}
+
+template<class T>
+void deflateArray(o3d::SmartArrayUInt8 &data , o3d::SmartArray<T> &out)
+{
+    // Decompression en utilisant Zlib
+    z_stream stream;
+    o3d::Int32 err;
+
+    stream.next_in = (Bytef*)data.getData();
+    stream.avail_in = (uInt)data.getSizeInBytes();
+    stream.next_out = (Bytef*)out.getData();
+    stream.avail_out = (uInt)out.getSizeInBytes();
+    stream.zalloc = (alloc_func)nullptr;
+    stream.zfree = (free_func)nullptr;
+    stream.opaque = nullptr;
+
+    // deflate data. wbits < 0 if no header data
+    // err = inflateInit2(&stream,-MAX_WBITS);
+    err = inflateInit(&stream);
+    if (err == Z_OK) {
+        err = inflate(&stream,Z_FINISH);
+        inflateEnd(&stream);
+        if (err == Z_STREAM_END) {
+            err = Z_OK;
+        }
+
+        err = Z_OK;
+        inflateEnd(&stream);
+    }
+}
+
+o3d::SmartArrayFloat Parser::readFloatArray()
+{
+    UInt32 arrayLen;
+    UInt32 encoding;
+    UInt32 compressedLength;
+
+    m_stream >> arrayLen
+             >> encoding
+             >> compressedLength;
+
+    if (encoding == 0) {
+        SmartArrayFloat arrF(arrayLen);
+        m_stream.read(arrF.getData(), arrayLen);
+
+        return arrF;
+    } else if (encoding == 1) {
+        SmartArrayUInt8 compressedData(compressedLength);
+        m_stream.read(compressedData.getData(), compressedLength);
+
+        SmartArrayFloat arrF(arrayLen);
+        deflateArray(compressedData, arrF);
+
+        return arrF;
+    } else {
+        O3D_ERROR(E_InvalidFormat("Unknown array encoding format"));
+    }
+}
+
+o3d::SmartArrayDouble Parser::readDoubleArray()
+{
+    UInt32 arrayLen;
+    UInt32 encoding;
+    UInt32 compressedLength;
+
+    m_stream >> arrayLen
+             >> encoding
+             >> compressedLength;
+
+    if (encoding == 0) {
+        SmartArrayDouble arrD(arrayLen);
+        m_stream.read(arrD.getData(), arrayLen);
+
+        return arrD;
+    } else if (encoding == 1) {
+        SmartArrayUInt8 compressedData(compressedLength);
+        m_stream.read(compressedData.getData(), compressedLength);
+
+        SmartArrayDouble arrD(arrayLen);
+        deflateArray(compressedData, arrD);
+
+        return arrD;
+    } else {
+        O3D_ERROR(E_InvalidFormat("Unknown array encoding format"));
+    }
+}
+
+o3d::SmartArrayInt32 Parser::readInt32Array()
+{
+    UInt32 arrayLen;
+    UInt32 encoding;
+    UInt32 compressedLength;
+
+    m_stream >> arrayLen
+             >> encoding
+             >> compressedLength;
+
+    if (encoding == 0) {
+        SmartArrayInt32 arrI32(arrayLen);
+        m_stream.read(arrI32.getData(), arrayLen);
+
+        return arrI32;
+    } else if (encoding == 1) {
+        SmartArrayUInt8 compressedData(compressedLength);
+        m_stream.read(compressedData.getData(), compressedLength);
+
+        SmartArrayInt32 arrI32(arrayLen);
+        deflateArray(compressedData, arrI32);
+
+        return arrI32;
+    } else {
+        O3D_ERROR(E_InvalidFormat("Unknown array encoding format"));
+    }
+}
+
+o3d::SmartArrayInt64 Parser::readInt64Array()
+{
+    UInt32 arrayLen;
+    UInt32 encoding;
+    UInt32 compressedLength;
+
+    m_stream >> arrayLen
+             >> encoding
+             >> compressedLength;
+
+    if (encoding == 0) {
+        SmartArrayInt64 arrI64(arrayLen);
+        m_stream.read(arrI64.getData(), arrayLen);
+
+        return arrI64;
+    } else if (encoding == 1) {
+        SmartArrayUInt8 compressedData(compressedLength);
+        m_stream.read(compressedData.getData(), compressedLength);
+
+        SmartArrayInt64 arrI64(arrayLen);
+        deflateArray(compressedData, arrI64);
+
+        return arrI64;
+    } else {
+        O3D_ERROR(E_InvalidFormat("Unknown array encoding format"));
+    }
+}
+
+o3d::SmartArrayUInt8 Parser::readBoolArray()
+{
+    UInt32 arrayLen;
+    UInt32 encoding;
+    UInt32 compressedLength;
+
+    m_stream >> arrayLen
+             >> encoding
+             >> compressedLength;
+
+    if (encoding == 0) {
+        SmartArrayUInt8 arrB(arrayLen);
+        m_stream.read(arrB.getData(), arrayLen);
+
+        return arrB;
+    } else if (encoding == 1) {
+        SmartArrayUInt8 compressedData(compressedLength);
+        m_stream.read(compressedData.getData(), compressedLength);
+
+        SmartArrayUInt8 arrB(arrayLen);
+        deflateArray(compressedData, arrB);
+
+        return arrB;
+    } else {
+        O3D_ERROR(E_InvalidFormat("Unknown array encoding format"));
+    }
+}
+
+o3d::String Parser::readStringProp()
+{
+    // same format
+    UInt32 strLen;
+    m_stream >> strLen;
+
+    if (strLen > 0) {
+        SmartArrayChar cstr(strLen+1);
+        m_stream.read(cstr.getData(), strLen);
+        cstr[strLen] = 0;
+
+        String str(cstr.getData(), cstr.getSize());
+        return str;
+    } else {
+        return String();
+    }
+}
+
+o3d::SmartArrayUInt8 Parser::readUInt8RawProp()
+{
+    // same format
+    SmartArrayUInt8 raw;
+    m_stream >> raw;
+
+    return raw;
 }

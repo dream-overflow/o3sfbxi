@@ -33,10 +33,18 @@ private:
     Bool parseBinary7300();
     Bool parseBinary7400();
 
-    void parseNodeBinary7300(FBXNode *parent);
-    void parseNodeBinary7400(FBXNode *parent);
+    Bool parseNodeBinary7300(FBXNode *parent);
+    Bool parseNodeBinary7400(FBXNode *parent);
 
     String readString();
+
+    SmartArrayFloat readFloatArray();
+    SmartArrayDouble readDoubleArray();
+    SmartArrayInt32 readInt32Array();
+    SmartArrayInt64 readInt64Array();
+    SmartArrayUInt8 readBoolArray();
+    String readStringProp();
+    SmartArrayUInt8 readUInt8RawProp();
 
     std::list<FBXNode*> m_nodes;
 };
