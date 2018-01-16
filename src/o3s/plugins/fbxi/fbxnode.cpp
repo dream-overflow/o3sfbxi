@@ -18,6 +18,10 @@ FBXNode::FBXNode(const String &name) :
 
 FBXNode::~FBXNode()
 {
+    for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
+        delete it->second;
+    }
+
     for (FBXNode *node : m_nodes) {
         delete node;
     }
@@ -42,4 +46,32 @@ FBXNode *FBXNode::child(const o3d::String &name)
     }
 
     return nullptr;
+}
+
+void FBXNode::addProperty(Property *property)
+{
+    if (property) {
+        m_properties[property->name()] = property;
+    }
+}
+
+const Property *FBXNode::property(const o3d::String &name) const
+{
+    auto cit = m_properties.find(name);
+    if (cit != m_properties.cend()) {
+        return cit->second;
+    } else {
+        return nullptr;
+    }
+}
+
+const std::list<const Property *> FBXNode::propertyList() const
+{
+    std::list<const Property*> res;
+
+    for (auto cit = m_properties.cbegin(); cit != m_properties.cend(); ++cit) {
+        res.push_back(cit->second);
+    }
+
+    return res;
 }
