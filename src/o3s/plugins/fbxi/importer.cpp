@@ -30,9 +30,10 @@ o3d::studio::common::ImporterOption *Importer::buildOptions()
     return nullptr;
 }
 
-o3d::Bool Importer::introspect(const o3d::String &filename)
+o3d::studio::common::ImportDefinition *Importer::introspect(const o3d::String &filename)
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
+    FbxImportDefinition *def = new FbxImportDefinition();
 
     Parser *parser = new Parser(inStream);
     Bool result = parser->parse();
@@ -43,12 +44,21 @@ o3d::Bool Importer::introspect(const o3d::String &filename)
     delete parser;
     delete inStream;
 
-    return result;
+    if (result) {
+        return def;
+    } else {
+        delete def;
+        return nullptr;
+    }
 }
 
-o3d::Bool Importer::import(const o3d::String &filename, o3d::studio::common::ImporterOption *options, o3d::studio::common::Entity *parent)
+o3d::studio::common::ImportDefinition *Importer::import(
+        const o3d::String &filename,
+        o3d::studio::common::ImporterOption *options,
+        o3d::studio::common::Entity *parent)
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
+    FbxImportDefinition *def = new FbxImportDefinition();
 
     Parser *parser = new Parser(inStream);
     Bool result = parser->parse();
@@ -59,5 +69,55 @@ o3d::Bool Importer::import(const o3d::String &filename, o3d::studio::common::Imp
     delete parser;
     delete inStream;
 
-    return result;
+    if (result) {
+        return def;
+    } else {
+        delete def;
+        return nullptr;
+    }
+}
+
+FbxImportDefinition::~FbxImportDefinition()
+{
+
+}
+
+o3d::String FbxImportDefinition::creator() const
+{
+    return m_creator;
+}
+
+o3d::DateTime FbxImportDefinition::creationDateTime() const
+{
+    return m_ceationTimestamp;
+}
+
+o3d::Float FbxImportDefinition::unit() const
+{
+    return m_unit;
+}
+
+o3d::UInt32 FbxImportDefinition::numModel() const
+{
+    return m_numModel;
+}
+
+o3d::UInt32 FbxImportDefinition::numGeometry() const
+{
+    return m_numGeometry;
+}
+
+o3d::UInt32 FbxImportDefinition::numMaterial() const
+{
+    return m_numMaterial;
+}
+
+o3d::UInt32 FbxImportDefinition::numCamera() const
+{
+    return m_numCamera;
+}
+
+o3d::UInt32 FbxImportDefinition::numLight() const
+{
+    return m_numLight;
 }
