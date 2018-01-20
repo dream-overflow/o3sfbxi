@@ -103,6 +103,11 @@ o3d::Float FbxImportDefinition::unit() const
     return m_unit;
 }
 
+o3d::Color FbxImportDefinition::ambientColor() const
+{
+    return m_ambientColor;
+}
+
 o3d::UInt32 FbxImportDefinition::numModel() const
 {
     return m_numModel;

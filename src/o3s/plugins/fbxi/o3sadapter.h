@@ -17,6 +17,8 @@
 #include <o3d/studio/common/workspace/asset.h>
 #include <o3d/studio/common/workspace/hub.h>
 
+#include <o3d/core/vector3.h>
+
 namespace o3d {
 namespace studio {
 namespace fbxi {
@@ -48,6 +50,10 @@ private:
     void setupDef();
     void setupAsset(common::Asset* asset);
     void setupHub(common::Hub* rootHub);
+
+    Vector3 m_upAxis;
+    Vector3 m_frontAxis;
+    Float m_unitScale;
 };
 
 } // namespace fbxi

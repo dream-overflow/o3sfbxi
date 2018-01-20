@@ -10,6 +10,7 @@
 #define _O3DS_FBXI_IMPORTER_H
 
 #include <o3d/core/instream.h>
+#include <o3d/image/color.h>
 #include <o3d/studio/common/global.h>
 #include <o3d/studio/common/importer/importer.h>
 #include <o3d/studio/common/importer/importdefinition.h>
@@ -33,6 +34,7 @@ public:
     virtual String creator() const override;
     virtual DateTime creationDateTime() const override;
     virtual Float unit() const override;
+    virtual Color ambientColor() const override;
 
     virtual UInt32 numModel() const override;
     virtual UInt32 numGeometry() const override;
@@ -45,6 +47,7 @@ private:
     String m_creator;
     DateTime m_creationTimestamp;
     Float m_unit;
+    Color m_ambientColor;
 
     UInt32 m_numModel;
     UInt32 m_numGeometry;

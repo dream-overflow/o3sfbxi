@@ -7,6 +7,7 @@
  */
 
 #include "fbxnode.h"
+#include "property/propertystring.h"
 
 using namespace o3d::studio::fbxi;
 
@@ -71,6 +72,34 @@ Property *FBXNode::property(o3d::UInt32 idx)
     } else {
         return nullptr;
     }
+}
+
+FBXNode *FBXNode::searchPropertyNode(const o3d::String &name)
+{
+    for (FBXNode *node : m_nodes) {
+        if (node->m_name == "P") {
+            if (node->m_properties.size() > 1) {
+                if (node->m_properties[0]->type() == Property::PROP_STRING) {
+                    System::print(static_cast<PropertyString*>(node->m_properties[0])->value(), "");
+                }
+            }
+        }
+    }
+
+    for (FBXNode *node : m_nodes) {
+        if (node->m_name == "P") {
+            if (node->m_properties.size() > 1) {
+                if (node->m_properties[0]->type() == Property::PROP_STRING) {
+                    if (static_cast<PropertyString*>(node->m_properties[0])->value() == name) {
+                        return node;
+                    }
+                }
+            }
+
+        }
+    }
+
+    return nullptr;
 }
 
 const std::vector<const Property *> FBXNode::properties() const

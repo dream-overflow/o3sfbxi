@@ -12,6 +12,7 @@
 #include "proxy/objectsproxy.h"
 #include "proxy/meshproxy.h"
 #include "proxy/relationsproxy.h"
+#include "proxy/globalsettingsproxy.h"
 // #include "proxy/takesproxy.h"
 // #include "proxy/takeproxy.h"
 
@@ -27,7 +28,10 @@ O3SAdapter::O3SAdapter(Parser *parser,
     m_parser(parser),
     m_options(options),
     m_parent(parent),
-    m_def(def)
+    m_def(def),
+    m_upAxis(0, 1, 0),
+    m_frontAxis(0, 0, 1),
+    m_unitScale(1.0)
 {
     O3D_ASSERT(parser);
     O3D_ASSERT(options);
@@ -73,23 +77,50 @@ o3d::Bool O3SAdapter::processImportLazy()
 
 void O3SAdapter::setupDef()
 {
-    HeaderProxy *hp = new HeaderProxy(m_parser->child("FBXHeaderExtension"));
+    FBXNode *node = m_parser->child("FBXHeaderExtension");
+    if (node) {
+        HeaderProxy *hp = new HeaderProxy(node);
+        m_def->m_creator = hp->creator();
+        m_def->m_creationTimestamp = hp->creationTimeStamp();
 
-    m_def->m_creator = hp->creator();
-    m_def->m_creationTimestamp = hp->creationTimeStamp();
-    // m_def->m_unit = ...
+        delete hp;
+    }
 
-    deletePtr(hp);
+    node = m_parser->child("GlobalSettings");
+    if (node) {
+        GlobalSettingsProxy *gs = new GlobalSettingsProxy(node);
+        m_unitScale = gs->unitScale();
+        m_upAxis = gs->upAxis();
+        m_frontAxis = gs->frontAxis();
+
+        m_def->m_ambientColor = gs->ambientColor();
+
+        delete gs;
+    }
+
+
+    node = m_parser->child("Objects");
+    if (node) {
+        ObjectsProxy *objects = new ObjectsProxy(node);
+        // @todo
+
+        delete objects;
+    }
+
+    m_def->m_unit = m_unitScale;
 }
 
 void O3SAdapter::setupAsset(common::Asset* asset)
 {
-    HeaderProxy *hp = new HeaderProxy(m_parser->child("FBXHeaderExtension"));
+    FBXNode *node = m_parser->child("FBXHeaderExtension");
+    if (node) {
+        HeaderProxy *hp = new HeaderProxy(node);
 
-    asset->setCreator(hp->creator());
-    asset->setCreationTimeStamp(hp->creationTimeStamp());
+        asset->setCreator(hp->creator());
+        asset->setCreationTimeStamp(hp->creationTimeStamp());
 
-    deletePtr(hp);
+        delete hp;
+    }
 }
 
 void O3SAdapter::setupHub(common::Hub* rootHub)

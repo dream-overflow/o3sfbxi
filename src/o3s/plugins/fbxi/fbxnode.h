@@ -33,6 +33,8 @@ public:
     const Property* property(UInt32 idx) const;
     Property* property(UInt32 idx);
 
+    FBXNode* searchPropertyNode(const String &name);
+
     const std::vector<const Property *> properties() const;
 
 protected:
