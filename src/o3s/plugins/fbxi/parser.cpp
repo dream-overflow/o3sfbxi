@@ -25,11 +25,7 @@
 #include "property/propertyfloat64array.h"
 #include "property/propertyboolarray.h"
 
-#ifdef _MSC_VER
-    #include <zlib/zlib.h>
-#else
-    #include <zlib.h>
-#endif
+#include <zlib.h>
 
 using namespace o3d::studio::fbxi;
 
@@ -129,10 +125,8 @@ o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
     FBXNode *node = new FBXNode(name);
     if (parent) {
         parent->addChild(node);
-        System::print(name, String("NEW NODE parent={0}").arg(parent->name()));
     } else {
         m_nodes.push_back(node);
-            System::print(name, String("NEW NODE parent={0}").arg("root"));
     }
 
     Int8 propType;
@@ -162,12 +156,10 @@ o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
             case 'F':
                 m_stream >> float32;
                 node->addProperty(new PropertyFloat32("", float32));
-                System::print("", String("f32={0}").arg(float32));
                 break;
             case 'D':
                 m_stream >> float64;
                 node->addProperty(new PropertyFloat64("", float64));
-                System::print("", String("f64={0}").arg(float64));
                 break;
             case 'L':
                 m_stream >> si64;
@@ -209,7 +201,6 @@ o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
             {
                 String str = readStringProp();
                 node->addProperty(new PropertyString("", str));
-                System::print(str, String("property of {0} with n={1}").arg(name).arg(numProps));
             }
                 break;
             case 'R':

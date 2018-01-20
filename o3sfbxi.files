@@ -1,3 +1,6 @@
+src/o3s/plugins/fbxi/adapter.h
+src/o3s/plugins/fbxi/o3sadapter.cpp
+src/o3s/plugins/fbxi/o3sadapter.h
 src/o3s/plugins/fbxi/property/propertyboolarray.h
 src/o3s/plugins/fbxi/property/propertyfloat32array.h
 src/o3s/plugins/fbxi/property/propertyfloat64array.h
