@@ -67,13 +67,35 @@ o3d::Bool Parser::parse()
 
     if (version == 7300) {
         result = parseBinary7300();
-    } else if (version == 7400) {
+    } else if (version >= 7400) {
         result = parseBinary7400();
     } else {
         O3D_ERROR(E_InvalidFormat(String("Unsupported FBX version ").arg(version)));
     }
 
     return result;
+}
+
+FBXNode *Parser::child(const o3d::String &name)
+{
+    for (FBXNode *node : m_nodes) {
+        if (node->name() == name) {
+            return node;
+        }
+    }
+
+    return nullptr;
+}
+
+const FBXNode *Parser::child(const o3d::String &name) const
+{
+    for (const FBXNode *node : m_nodes) {
+        if (node->name() == name) {
+            return node;
+        }
+    }
+
+    return nullptr;
 }
 
 o3d::Bool Parser::parseBinary7300()

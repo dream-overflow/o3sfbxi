@@ -1,0 +1,4 @@
+#ifndef OBJECTSPROXY_H
+#define OBJECTSPROXY_H
+
+#endif // OBJECTSPROXY_H

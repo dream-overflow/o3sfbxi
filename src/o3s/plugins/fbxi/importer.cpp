@@ -8,6 +8,7 @@
 
 #include "importer.h"
 #include "parser.h"
+#include "o3sadapter.h"
 
 #include <o3d/core/filemanager.h>
 
@@ -63,11 +64,16 @@ o3d::studio::common::ImportDefinition *Importer::import(
     Parser *parser = new Parser(inStream);
     Bool result = parser->parse();
 
-    // instanciate into parent entity
-    // @todo
+    if (result) {
+        // instanciate into parent entity
+        O3SAdapter *adapter = new O3SAdapter(parser, options, parent, def);
+        result = adapter->processImport();
+
+        delete adapter;
+    }
 
     delete parser;
-    delete inStream;
+    delete inStream;   // keep until the if lazy mode
 
     if (result) {
         return def;
@@ -89,7 +95,7 @@ o3d::String FbxImportDefinition::creator() const
 
 o3d::DateTime FbxImportDefinition::creationDateTime() const
 {
-    return m_ceationTimestamp;
+    return m_creationTimestamp;
 }
 
 o3d::Float FbxImportDefinition::unit() const

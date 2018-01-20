@@ -1,0 +1,4 @@
+#ifndef CAMERAPROXY_H
+#define CAMERAPROXY_H
+
+#endif // CAMERAPROXY_H

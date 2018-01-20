@@ -16,16 +16,21 @@ namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class Adapter
+class O3S_PLUGIN_API Adapter
 {
 public:
 
     /**
      * @brief Do here your import processing using the structure of FBXNode.
-     * @param rootNodes First level of FBX nodes.
      * @return True if success.
      */
-    virtual Bool processImport(std::list<FBXNode*> &rootNodes) = 0;
+    virtual Bool processImport() = 0;
+
+    /**
+     * @brief Do here your import processing using the structure of FBXNode.
+     * @return True if success.
+     */
+    virtual Bool processImportLazy() = 0;
 };
 
 } // namespace fbxi

@@ -26,6 +26,9 @@ public:
 
     o3d::Bool parse();
 
+    FBXNode *child(const String &name);
+    const FBXNode *child(const String &name) const;
+
 private:
 
     InStream &m_stream;

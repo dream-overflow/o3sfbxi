@@ -1,0 +1,4 @@
+#ifndef MATERIALPROXY_H
+#define MATERIALPROXY_H
+
+#endif // MATERIALPROXY_H

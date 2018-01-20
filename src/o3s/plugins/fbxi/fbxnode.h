@@ -9,16 +9,15 @@
 #ifndef _O3DS_FBXI_FBXNODE_H
 #define _O3DS_FBXI_FBXNODE_H
 
+#include <vector>
 #include <o3d/core/instream.h>
-#include <o3d/core/stringmap.h>
-
 #include "property/property.h"
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class FBXNode
+class O3S_PLUGIN_API FBXNode
 {
 public:
 
@@ -31,16 +30,17 @@ public:
     FBXNode *child(const String &name);
 
     void addProperty(Property *property);
-    const Property* property(const String &name) const;
+    const Property* property(UInt32 idx) const;
+    Property* property(UInt32 idx);
 
-    const std::list<const Property *> propertyList() const;
+    const std::vector<const Property *> properties() const;
 
 protected:
 
     String m_name;
 
     std::list<FBXNode*> m_nodes;
-    StringMap<Property*> m_properties;
+    std::vector<Property*> m_properties;
 };
 
 } // namespace fbxi

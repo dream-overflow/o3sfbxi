@@ -24,6 +24,8 @@ namespace fbxi {
  */
 class O3S_PLUGIN_API FbxImportDefinition : public common::ImportDefinition
 {
+    friend class O3SAdapter;
+
 public:
 
     virtual ~FbxImportDefinition();
@@ -41,7 +43,7 @@ public:
 private:
 
     String m_creator;
-    DateTime m_ceationTimestamp;
+    DateTime m_creationTimestamp;
     Float m_unit;
 
     UInt32 m_numModel;
@@ -54,7 +56,7 @@ private:
 /**
  * @brief The Importer class specialisation for FBX.
  */
-class /*O3S_PLUGIN_API*/ Importer : public common::Importer
+class O3S_PLUGIN_API Importer : public common::Importer
 {
 public:
 

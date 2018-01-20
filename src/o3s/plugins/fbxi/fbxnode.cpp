@@ -18,8 +18,8 @@ FBXNode::FBXNode(const String &name) :
 
 FBXNode::~FBXNode()
 {
-    for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
-        delete it->second;
+    for (Property *property : m_properties) {
+        delete property;
     }
 
     for (FBXNode *node : m_nodes) {
@@ -51,26 +51,34 @@ FBXNode *FBXNode::child(const o3d::String &name)
 void FBXNode::addProperty(Property *property)
 {
     if (property) {
-        m_properties[property->name()] = property;
+        m_properties.push_back(property);
     }
 }
 
-const Property *FBXNode::property(const o3d::String &name) const
+const Property *FBXNode::property(UInt32 idx) const
 {
-    auto cit = m_properties.find(name);
-    if (cit != m_properties.cend()) {
-        return cit->second;
+    if (idx < m_properties.size()) {
+        return m_properties[idx];
     } else {
         return nullptr;
     }
 }
 
-const std::list<const Property *> FBXNode::propertyList() const
+Property *FBXNode::property(o3d::UInt32 idx)
 {
-    std::list<const Property*> res;
+    if (idx < m_properties.size()) {
+        return m_properties[idx];
+    } else {
+        return nullptr;
+    }
+}
+
+const std::vector<const Property *> FBXNode::properties() const
+{
+    std::vector<const Property*> res;
 
     for (auto cit = m_properties.cbegin(); cit != m_properties.cend(); ++cit) {
-        res.push_back(cit->second);
+        res.push_back(*cit);
     }
 
     return res;

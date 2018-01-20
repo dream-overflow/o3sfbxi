@@ -1,0 +1,4 @@
+#ifndef RELATIONSPROXY_H
+#define RELATIONSPROXY_H
+
+#endif // RELATIONSPROXY_H

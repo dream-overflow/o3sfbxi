@@ -10,12 +10,13 @@
 #define _O3DS_FBXI_PROPERTY_H
 
 #include <o3d/core/string.h>
+#include <o3d/studio/common/global.h>
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class Property
+class O3S_PLUGIN_API Property
 {
 public:
 

@@ -10,10 +10,10 @@
 #define _O3DS_FBXI_O3SADAPTER_H
 
 #include "adapter.h"
+#include "parser.h"
 
-#include <o3d/studio/common/global.h>
-#include <o3d/studio/common/importer/importer.h>
-#include <o3d/studio/common/importer/importdefinition.h>
+#include "importer.h"
+
 #include <o3d/studio/common/workspace/asset.h>
 #include <o3d/studio/common/workspace/hub.h>
 
@@ -21,20 +21,31 @@ namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class O3SAdapter : public Adapter
+class O3S_PLUGIN_API O3SAdapter : public Adapter
 {
 public:
 
-    O3SAdapter(common::ImporterOption *options, common::Entity *parent);
+    O3SAdapter(
+            Parser *parser,
+            common::ImporterOption *options,
+            common::Entity *parent,
+            FbxImportDefinition* def);
+
     virtual ~O3SAdapter();
 
-    virtual Bool processImport(std::list<FBXNode*> &rootNodes) override;
+    virtual Bool processImport() override;
+    virtual Bool processImportLazy() override;
 
 private:
+
+    Parser *m_parser;
 
     common::ImporterOption *m_options;
     common::Entity *m_parent;
 
+    FbxImportDefinition *m_def;
+
+    void setupDef();
     void setupAsset(common::Asset* asset);
     void setupHub(common::Hub* rootHub);
 };
