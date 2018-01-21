@@ -8,7 +8,7 @@
 
 #include "o3sadapter.h"
 #include "proxy/headerproxy.h"
-#include "proxy/definitionproxy.h"
+#include "proxy/definitionsproxy.h"
 #include "proxy/objectsproxy.h"
 #include "proxy/meshproxy.h"
 #include "proxy/relationsproxy.h"
@@ -92,12 +92,13 @@ void O3SAdapter::setupDef()
         m_unitScale = gs->unitScale();
         m_upAxis = gs->upAxis();
         m_frontAxis = gs->frontAxis();
+        m_startTime = gs->timeSpanStart();
+        m_endTime = gs->timeSpanEnd();
 
         m_def->m_ambientColor = gs->ambientColor();
 
         delete gs;
     }
-
 
     node = m_parser->child("Objects");
     if (node) {
@@ -105,6 +106,15 @@ void O3SAdapter::setupDef()
         // @todo
 
         delete objects;
+    }
+
+    node = m_parser->child("Definitions");
+    if (node) {
+        DefinitionsProxy *definitions = new DefinitionsProxy(node);
+        // @todo
+        Int32 count = definitions->count();
+
+        delete definitions;
     }
 
     m_def->m_unit = m_unitScale;

@@ -34,10 +34,11 @@ public:
 
     Color ambientColor();
 
+    Int64 timeSpanStart();
+    Int64 timeSpanEnd();
+
     // DefaultCamera
     // TimeMode
-    // TimeSpanStart
-    // TimeSpanStop
     // CustomFrameRate
 };
 

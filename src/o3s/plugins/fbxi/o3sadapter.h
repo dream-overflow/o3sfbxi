@@ -54,6 +54,9 @@ private:
     Vector3 m_upAxis;
     Vector3 m_frontAxis;
     Float m_unitScale;
+
+    Int64 m_startTime;   //!< unit of 1/46186158000 seconds
+    Int64 m_endTime;
 };
 
 } // namespace fbxi

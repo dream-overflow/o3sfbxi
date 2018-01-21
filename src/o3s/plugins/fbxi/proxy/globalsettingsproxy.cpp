@@ -22,6 +22,8 @@ GlobalSettingsProxy::GlobalSettingsProxy(FBXNode *node) :
     if (!m_node || m_node->name() != "GlobalSettings") {
         O3D_ERROR(E_InvalidParameter("Must be an GlobalSettings node"));
     }
+
+    // @todo check Version == 1000
 }
 
 o3d::Vector3 GlobalSettingsProxy::upAxis()
@@ -34,13 +36,11 @@ o3d::Vector3 GlobalSettingsProxy::upAxis()
     if (p70) {
         FBXNode *P = p70->searchPropertyNode("UpAxis");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            a = static_cast<PropertyInt32*>(P->property(4))->value();
+            a = P->interpretAsInt32();
         }
         P = p70->searchPropertyNode("UpAxisSign");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            sign = static_cast<PropertyInt32*>(P->property(4))->value();
+            sign = P->interpretAsInt32();
         }
 
         if (a == 0) {
@@ -65,13 +65,11 @@ o3d::Vector3 GlobalSettingsProxy::frontAxis()
     if (p70) {
         FBXNode *P = p70->searchPropertyNode("FrontAxis");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            Int32 a = static_cast<PropertyInt32*>(P->property(4))->value();
+            a = P->interpretAsInt32();
         }
         P = p70->searchPropertyNode("FrontAxisSign");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            sign = static_cast<PropertyInt32*>(P->property(4))->value();
+            sign = P->interpretAsInt32();
         }
 
         if (a == 0) {
@@ -96,13 +94,11 @@ o3d::Vector3 GlobalSettingsProxy::coordAxis()
     if (p70) {
         FBXNode *P = p70->searchPropertyNode("CoordAxis");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            a = static_cast<PropertyInt32*>(P->property(4))->value();
+            a = P->interpretAsInt32();
         }
         P = p70->searchPropertyNode("CoordAxisSign");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            sign = static_cast<PropertyInt32*>(P->property(4))->value();
+            sign = P->interpretAsInt32();
         }
 
         if (a == 0) {
@@ -125,10 +121,7 @@ o3d::Double GlobalSettingsProxy::unitScale()
     if (p70) {
         FBXNode *P = p70->searchPropertyNode("UnitScaleFactor");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            Double value = static_cast<PropertyFloat64*>(P->property(4))->value();
-
-            scale = value;
+            scale = P->interpretAsDouble();
         }
     }
 
@@ -138,22 +131,44 @@ o3d::Double GlobalSettingsProxy::unitScale()
 o3d::Color GlobalSettingsProxy::ambientColor()
 {
     Color color;
-    color.a(1.0);
 
     FBXNode *p70 = m_node->child("Properties70");
     if (p70) {
         FBXNode *P = p70->searchPropertyNode("AmbientColor");
         if (P) {
-            String type = static_cast<PropertyString*>(P->property(1))->value();
-            Property::Type ptype = P->property(4)->type();
-
-            if (ptype == Property::PROP_FLOAT64) {
-                color.r(static_cast<PropertyFloat64*>(P->property(4))->value());
-                color.g(static_cast<PropertyFloat64*>(P->property(5))->value());
-                color.b(static_cast<PropertyFloat64*>(P->property(6))->value());
-            }
+            color = P->interpretAsColor();
         }
     }
 
     return color;
+}
+
+o3d::Int64 GlobalSettingsProxy::timeSpanStart()
+{
+    Int64 t = 0;
+
+    FBXNode *p70 = m_node->child("Properties70");
+    if (p70) {
+        FBXNode *P = p70->searchPropertyNode("TimeSpanStart");
+        if (P) {
+            t = P->interpretAsTime();
+        }
+    }
+
+    return t;
+}
+
+o3d::Int64 GlobalSettingsProxy::timeSpanEnd()
+{
+    Int64 t = 0;
+
+    FBXNode *p70 = m_node->child("Properties70");
+    if (p70) {
+        FBXNode *P = p70->searchPropertyNode("TimeSpanStop");
+        if (P) {
+            t = P->interpretAsTime();
+        }
+    }
+
+    return t;
 }

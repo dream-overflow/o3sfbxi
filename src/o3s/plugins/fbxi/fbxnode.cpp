@@ -8,6 +8,11 @@
 
 #include "fbxnode.h"
 #include "property/propertystring.h"
+#include "property/propertyfloat32.h"
+#include "property/propertyfloat64.h"
+#include "property/propertyint16.h"
+#include "property/propertyint32.h"
+#include "property/propertyint64.h"
 
 using namespace o3d::studio::fbxi;
 
@@ -74,6 +79,11 @@ Property *FBXNode::property(o3d::UInt32 idx)
     }
 }
 
+o3d::UInt32 FBXNode::numProperties() const
+{
+    return (UInt32)m_properties.size();
+}
+
 FBXNode *FBXNode::searchPropertyNode(const o3d::String &name)
 {
     for (FBXNode *node : m_nodes) {
@@ -111,4 +121,144 @@ const std::vector<const Property *> FBXNode::properties() const
     }
 
     return res;
+}
+
+o3d::Int32 FBXNode::directAsInt32() const
+{
+    Int32 i = 0;
+
+    if (m_properties.size() == 1) {
+        Property::Type typeDef = m_properties[0]->type();
+        if (typeDef == Property::PROP_INT32) {
+            PropertyInt32 *pV = static_cast<PropertyInt32*>(m_properties[0]);
+            i = pV->value();
+        }
+    }
+
+    return i;
+}
+
+o3d::Vector3 FBXNode::interpretAsVector3() const
+{
+    Vector3 v;
+
+    if ((m_properties.size() == 7) && (m_name == "P" || m_name == "PS")) {
+        String typeName = static_cast<PropertyString*>(m_properties[1])->value();
+        Property::Type typeDef = m_properties[4]->type();
+
+        if (typeName == "ColorRGB" && typeDef == Property::PROP_FLOAT64) {
+            v.x() = static_cast<PropertyFloat64*>(m_properties[4])->value();
+            v.y() = static_cast<PropertyFloat64*>(m_properties[5])->value();
+            v.z() = static_cast<PropertyFloat64*>(m_properties[6])->value();
+        } else if (typeName == "ColorRGB" && typeDef == Property::PROP_FLOAT32) {
+            v.x() = static_cast<PropertyFloat32*>(m_properties[4])->value();
+            v.y() = static_cast<PropertyFloat32*>(m_properties[5])->value();
+            v.z() = static_cast<PropertyFloat32*>(m_properties[6])->value();
+        }
+    }
+
+    return v;
+}
+
+o3d::Color FBXNode::interpretAsColor() const
+{
+    Color color;
+    color.a(1.0);
+
+    if ((m_properties.size() == 7) && (m_name == "P" || m_name == "PS")) {
+        String typeName = static_cast<PropertyString*>(m_properties[1])->value();
+        Property::Type typeDef = m_properties[4]->type();
+
+        if (typeName == "ColorRGB" && typeDef == Property::PROP_FLOAT64) {
+            color.r(static_cast<PropertyFloat64*>(m_properties[4])->value());
+            color.g(static_cast<PropertyFloat64*>(m_properties[5])->value());
+            color.b(static_cast<PropertyFloat64*>(m_properties[6])->value());
+        } else if (typeName == "ColorRGB" && typeDef == Property::PROP_FLOAT32) {
+            color.r(static_cast<PropertyFloat32*>(m_properties[4])->value());
+            color.g(static_cast<PropertyFloat32*>(m_properties[5])->value());
+            color.b(static_cast<PropertyFloat32*>(m_properties[6])->value());
+        }
+    }
+
+    return color;
+}
+
+o3d::Float FBXNode::interpretAsFloat() const
+{
+    Float f = 0.0;
+
+    if ((m_properties.size() == 5) && (m_name == "P" || m_name == "PS")) {
+        String typeName = static_cast<PropertyString*>(m_properties[1])->value();
+        Property::Type typeDef = m_properties[4]->type();
+
+        if (typeName == "float" && typeDef == Property::PROP_FLOAT32) {
+            f = static_cast<PropertyFloat64*>(m_properties[4])->value();
+        }
+    }
+
+    return f;
+}
+
+o3d::Double FBXNode::interpretAsDouble() const
+{
+    Double f = 0.0;
+
+    if (m_properties.size() == 5) {
+        String typeName = static_cast<PropertyString*>(m_properties[1])->value();
+        Property::Type typeDef = m_properties[4]->type();
+
+        if (typeName == "double" && typeDef == Property::PROP_FLOAT64) {
+            f = static_cast<PropertyFloat64*>(m_properties[4])->value();
+        }
+    }
+
+    return f;
+}
+
+o3d::Int32 FBXNode::interpretAsInt32() const
+{
+    Int32 i = 0.0;
+
+    if ((m_properties.size() == 5) && (m_name == "P" || m_name == "PS")) {
+        String typeName = static_cast<PropertyString*>(m_properties[1])->value();
+        Property::Type typeDef = m_properties[4]->type();
+
+        if (typeName == "int" && typeDef == Property::PROP_INT32) {
+            i = static_cast<PropertyInt32*>(m_properties[4])->value();
+        }
+    }
+
+    return i;
+}
+
+o3d::Int64 FBXNode::interpretAsInt64() const
+{
+    Int64 i = 0.0;
+
+    if ((m_properties.size() == 5) && (m_name == "P" || m_name == "PS")) {
+        String typeName = static_cast<PropertyString*>(m_properties[1])->value();
+        Property::Type typeDef = m_properties[4]->type();
+
+        if (typeName == "int" && typeDef == Property::PROP_INT64) {
+            i = static_cast<PropertyInt64*>(m_properties[4])->value();
+        }
+    }
+
+    return i;
+}
+
+o3d::Int64 FBXNode::interpretAsTime() const
+{
+    Int64 i = 0.0;
+
+    if ((m_properties.size() == 5) && (m_name == "P" || m_name == "PS")) {
+        String typeName = static_cast<PropertyString*>(m_properties[1])->value();
+        Property::Type typeDef = m_properties[4]->type();
+
+        if (typeName == "KTime" && typeDef == Property::PROP_INT64) {
+            i = static_cast<PropertyInt64*>(m_properties[4])->value();
+        }
+    }
+
+    return i;
 }

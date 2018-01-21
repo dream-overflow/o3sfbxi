@@ -1,3 +1,5 @@
+src/o3s/plugins/fbxi/proxy/definitionsproxy.cpp
+src/o3s/plugins/fbxi/proxy/definitionsproxy.h
 src/o3s/plugins/fbxi/proxy/proxy.h
 src/o3s/plugins/fbxi/proxy/relationsproxy.cpp
 src/o3s/plugins/fbxi/proxy/relationsproxy.h
@@ -13,8 +15,6 @@ src/o3s/plugins/fbxi/proxy/meshproxy.cpp
 src/o3s/plugins/fbxi/proxy/meshproxy.h
 src/o3s/plugins/fbxi/proxy/objectsproxy.cpp
 src/o3s/plugins/fbxi/proxy/objectsproxy.h
-src/o3s/plugins/fbxi/proxy/definitionproxy.cpp
-src/o3s/plugins/fbxi/proxy/definitionproxy.h
 src/o3s/plugins/fbxi/proxy/headerproxy.cpp
 src/o3s/plugins/fbxi/proxy/headerproxy.h
 src/o3s/plugins/fbxi/adapter.h

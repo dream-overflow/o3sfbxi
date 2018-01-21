@@ -41,6 +41,10 @@ HeaderProxy::HeaderProxy(FBXNode *node) :
     if (!m_node || m_node->name() != "FBXHeaderExtension") {
         O3D_ERROR(E_InvalidParameter("Must be a FBXHeaderExtension node"));
     }
+
+    // @todo check Version == 1000
+    // FBXHeaderVersion: 1003
+    // FBXVersion: 7400
 }
 
 o3d::DateTime HeaderProxy::creationTimeStamp() const
