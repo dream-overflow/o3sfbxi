@@ -19,8 +19,8 @@ class PropertyFloat64Array : public Property
 {
 public:
 
-    PropertyFloat64Array(const String &name, SmartArrayDouble &value) :
-        Property(name, PROP_FLOAT64_ARRAY),
+    PropertyFloat64Array(SmartArrayDouble &value) :
+        Property(PROP_FLOAT64_ARRAY),
         m_value(value)
     {
 

@@ -54,6 +54,22 @@ FBXNode *FBXNode::child(const o3d::String &name)
     return nullptr;
 }
 
+FBXNode *FBXNode::childAt(o3d::UInt32 i)
+{
+    if (i < (UInt32)m_nodes.size()) {
+        UInt32 c = 0;
+        for (auto it = m_nodes.begin(); it != m_nodes.end(); ++it) {
+            if (c == i) {
+                return *it;
+            }
+
+            ++c;
+        }
+    }
+
+    return nullptr;
+}
+
 void FBXNode::addProperty(Property *property)
 {
     if (property) {
@@ -82,6 +98,11 @@ Property *FBXNode::property(o3d::UInt32 idx)
 o3d::UInt32 FBXNode::numProperties() const
 {
     return (UInt32)m_properties.size();
+}
+
+o3d::UInt32 FBXNode::numChildren() const
+{
+    return (UInt32)m_nodes.size();
 }
 
 FBXNode *FBXNode::searchPropertyNode(const o3d::String &name)

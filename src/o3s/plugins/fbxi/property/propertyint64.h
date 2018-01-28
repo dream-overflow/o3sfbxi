@@ -19,8 +19,8 @@ class PropertyInt64 : public Property
 {
 public:
 
-    PropertyInt64(const String &name, Int64 value) :
-        Property(name, PROP_INT64),
+    PropertyInt64(Int64 value) :
+        Property(PROP_INT64),
         m_value(value)
     {
 

@@ -10,11 +10,20 @@
 #include "proxy/headerproxy.h"
 #include "proxy/definitionsproxy.h"
 #include "proxy/objectsproxy.h"
-#include "proxy/meshproxy.h"
+#include "proxy/modelproxy.h"
 #include "proxy/relationsproxy.h"
 #include "proxy/globalsettingsproxy.h"
+#include "proxy/connectionsproxy.h"
 // #include "proxy/takesproxy.h"
 // #include "proxy/takeproxy.h"
+
+#include "proxy/modelproxy.h"
+#include "proxy/materialproxy.h"
+#include "proxy/cameraproxy.h"
+#include "proxy/lightproxy.h"
+#include "proxy/textureproxy.h"
+#include "proxy/nodeattributeproxy.h"
+#include "proxy/geometryproxy.h"
 
 #include <o3d/studio/common/objectref.h>
 #include <o3d/studio/common/component/dummyhub.h>
@@ -100,14 +109,6 @@ void O3SAdapter::setupDef()
         delete gs;
     }
 
-    node = m_parser->child("Objects");
-    if (node) {
-        ObjectsProxy *objects = new ObjectsProxy(node);
-        // @todo
-
-        delete objects;
-    }
-
     node = m_parser->child("Definitions");
     if (node) {
         DefinitionsProxy *definitions = new DefinitionsProxy(node);
@@ -115,6 +116,64 @@ void O3SAdapter::setupDef()
         Int32 count = definitions->count();
 
         delete definitions;
+    }
+
+    node = m_parser->child("Objects");
+    if (node) {
+        ObjectsProxy *objects = new ObjectsProxy(node);
+        // @todo
+
+        for (UInt32 i = 0; i < objects->numObjects(); ++i) {
+            switch (objects->objectType(i)) {
+                case ObjectsProxy::OBJECT_CAMERA:
+                {
+                    CameraProxy *cp = objects->camera(i);
+                }
+                    break;
+                case ObjectsProxy::OBJECT_GEOMETRY:
+                {
+                    GeometryProxy *gp = objects->geometry(i);
+                }
+                    break;
+                case ObjectsProxy::OBJECT_LIGHT:
+                {
+                    LightProxy *lp = objects->light(i);
+                }
+                    break;
+                case ObjectsProxy::OBJECT_MATERIAL:
+                {
+                    MaterialProxy *mp = objects->material(i);
+                }
+                    break;
+                case ObjectsProxy::OBJECT_MODEL:
+                {
+                    ModelProxy *mp = objects->model(i);
+                }
+                    break;
+                case ObjectsProxy::OBJECT_NODE_ATTRIBUTE:
+                {
+                    NodeAttributeProxy *np = objects->nodeAttribute(i);
+                }
+                    break;
+                case ObjectsProxy::OBJECT_TEXTURE:
+                {
+                    TextureProxy *tp = objects->texture(i);
+                }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        delete objects;
+    }
+
+    node = m_parser->child("Connections");
+    if (node) {
+        ConnectionsProxy *connections = new ConnectionsProxy(node);
+        // @todo
+
+        delete connections;
     }
 
     m_def->m_unit = m_unitScale;

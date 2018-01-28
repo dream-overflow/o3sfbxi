@@ -19,8 +19,8 @@ class PropertyInt32Array : public Property
 {
 public:
 
-    PropertyInt32Array(const String &name, SmartArrayInt32 &value) :
-        Property(name, PROP_INT32_ARRAY),
+    PropertyInt32Array(SmartArrayInt32 &value) :
+        Property(PROP_INT32_ARRAY),
         m_value(value)
     {
 

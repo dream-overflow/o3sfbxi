@@ -1,0 +1,4 @@
+#ifndef GEOMETRYPROXY_H
+#define GEOMETRYPROXY_H
+
+#endif // GEOMETRYPROXY_H

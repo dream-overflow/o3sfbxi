@@ -19,8 +19,8 @@ class PropertyInt64Array : public Property
 {
 public:
 
-    PropertyInt64Array(const String &name, SmartArrayInt64 &value) :
-        Property(name, PROP_INT64_ARRAY),
+    PropertyInt64Array(SmartArrayInt64 &value) :
+        Property(PROP_INT64_ARRAY),
         m_value(value)
     {
 

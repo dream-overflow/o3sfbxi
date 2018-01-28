@@ -19,8 +19,8 @@ class PropertyFloat32 : public Property
 {
 public:
 
-    PropertyFloat32(const String &name, Float value) :
-        Property(name, PROP_FLOAT32),
+    PropertyFloat32( Float value) :
+        Property(PROP_FLOAT32),
         m_value(value)
     {
 

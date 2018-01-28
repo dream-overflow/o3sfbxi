@@ -10,8 +10,7 @@
 
 using namespace o3d::studio::fbxi;
 
-Property::Property(const o3d::String &name, Property::Type type) :
-    m_name(name),
+Property::Property(Property::Type type) :
     m_type(type)
 {
 }

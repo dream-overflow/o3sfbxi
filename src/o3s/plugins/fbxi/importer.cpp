@@ -55,8 +55,8 @@ o3d::studio::common::ImportDefinition *Importer::introspect(const o3d::String &f
 
 o3d::studio::common::ImportDefinition *Importer::import(
         const o3d::String &filename,
-        o3d::studio::common::ImporterOption *options,
-        o3d::studio::common::Entity *parent)
+        common::ImporterOption *options,
+        common::Entity *parent)
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
     FbxImportDefinition *def = new FbxImportDefinition();
@@ -73,7 +73,7 @@ o3d::studio::common::ImportDefinition *Importer::import(
     }
 
     delete parser;
-    delete inStream;   // keep until the if lazy mode
+    delete inStream;   // keep until the end if lazy mode
 
     if (result) {
         return def;

@@ -1,0 +1,4 @@
+#ifndef ANIMCURVEPROXY_H
+#define ANIMCURVEPROXY_H
+
+#endif // ANIMCURVEPROXY_H

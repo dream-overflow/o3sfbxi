@@ -19,8 +19,8 @@ class PropertyBool : public Property
 {
 public:
 
-    PropertyBool(const String &name, Bool value) :
-        Property(name, PROP_BOOL),
+    PropertyBool(Bool value) :
+        Property(PROP_BOOL),
         m_value(value)
     {
 

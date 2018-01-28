@@ -1,0 +1,4 @@
+#ifndef ANIMLAYERPROXY_H
+#define ANIMLAYERPROXY_H
+
+#endif // ANIMLAYERPROXY_H

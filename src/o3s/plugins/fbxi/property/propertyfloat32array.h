@@ -19,8 +19,8 @@ class PropertyFloat32Array : public Property
 {
 public:
 
-    PropertyFloat32Array(const String &name, SmartArrayFloat &value) :
-        Property(name, PROP_FLOAT32_ARRAY),
+    PropertyFloat32Array(SmartArrayFloat &value) :
+        Property(PROP_FLOAT32_ARRAY),
         m_value(value)
     {
 

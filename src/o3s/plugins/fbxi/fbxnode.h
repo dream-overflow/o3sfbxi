@@ -30,12 +30,14 @@ public:
 
     void addChild(FBXNode *child);
     FBXNode *child(const String &name);
+    FBXNode *childAt(UInt32 i);
 
     void addProperty(Property *property);
     const Property* property(UInt32 idx) const;
     Property* property(UInt32 idx);
 
     UInt32 numProperties() const;
+    UInt32 numChildren() const;
 
     FBXNode* searchPropertyNode(const String &name);
 

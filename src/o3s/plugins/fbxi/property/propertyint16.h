@@ -19,8 +19,8 @@ class PropertyInt16 : public Property
 {
 public:
 
-    PropertyInt16(const String &name, Int16 value) :
-        Property(name, PROP_INT16),
+    PropertyInt16(Int16 value) :
+        Property(PROP_INT16),
         m_value(value)
     {
 

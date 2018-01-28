@@ -19,8 +19,8 @@ class PropertyInt32 : public Property
 {
 public:
 
-    PropertyInt32(const String &name, Int32 value) :
-        Property(name, PROP_INT32),
+    PropertyInt32(Int32 value) :
+        Property(PROP_INT32),
         m_value(value)
     {
 

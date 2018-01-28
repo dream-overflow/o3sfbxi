@@ -19,8 +19,8 @@ class PropertyString : public Property
 {
 public:
 
-    PropertyString(const String &name, const String &value) :
-        Property(name, PROP_STRING),
+    PropertyString(const String &value) :
+        Property(PROP_STRING),
         m_value(value)
     {
 

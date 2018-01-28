@@ -19,8 +19,8 @@ class PropertyRawByteArray : public Property
 {
 public:
 
-    PropertyRawByteArray(const String &name, SmartArrayUInt8 &value) :
-        Property(name, PROP_RAW_BYTE_ARRAY),
+    PropertyRawByteArray(SmartArrayUInt8 &value) :
+        Property(PROP_RAW_BYTE_ARRAY),
         m_value(value)
     {
 

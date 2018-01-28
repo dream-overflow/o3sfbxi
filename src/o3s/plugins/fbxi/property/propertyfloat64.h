@@ -19,8 +19,8 @@ class PropertyFloat64 : public Property
 {
 public:
 
-    PropertyFloat64(const String &name, Double value) :
-        Property(name, PROP_FLOAT64),
+    PropertyFloat64(Double value) :
+        Property(PROP_FLOAT64),
         m_value(value)
     {
 

@@ -165,70 +165,70 @@ o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
         switch (propType) {
             case 'Y':
                 m_stream >> si16;
-                node->addProperty(new PropertyInt16("", si16));
+                node->addProperty(new PropertyInt16(si16));
                 break;
             case 'C':
                 m_stream >> b;
-                node->addProperty(new PropertyBool("", b > 0));
+                node->addProperty(new PropertyBool(b > 0));
                 break;
             case 'I':
                 m_stream >> si32;
-                node->addProperty(new PropertyInt32("", si32));
+                node->addProperty(new PropertyInt32(si32));
                 break;
             case 'F':
                 m_stream >> float32;
-                node->addProperty(new PropertyFloat32("", float32));
+                node->addProperty(new PropertyFloat32(float32));
                 break;
             case 'D':
                 m_stream >> float64;
-                node->addProperty(new PropertyFloat64("", float64));
+                node->addProperty(new PropertyFloat64(float64));
                 break;
             case 'L':
                 m_stream >> si64;
-                node->addProperty(new PropertyInt64("", si64));
+                node->addProperty(new PropertyInt64(si64));
                 break;
 
             case 'f':
             {
                 SmartArrayFloat arrF = readFloatArray();
-                node->addProperty(new PropertyFloat32Array("", arrF));
+                node->addProperty(new PropertyFloat32Array(arrF));
             }
                 break;
             case 'd':
             {
                 SmartArrayDouble arrD = readDoubleArray();
-                node->addProperty(new PropertyFloat64Array("", arrD));
+                node->addProperty(new PropertyFloat64Array(arrD));
             }
                 break;
             case 'l':
             {
                 SmartArrayInt64 arrI64 = readInt64Array();
-                node->addProperty(new PropertyInt64Array("", arrI64));
+                node->addProperty(new PropertyInt64Array(arrI64));
             }
                 break;
             case 'i':
             {
                 SmartArrayInt32 arrI32 = readInt32Array();
-                node->addProperty(new PropertyInt32Array("", arrI32));
+                node->addProperty(new PropertyInt32Array(arrI32));
             }
                 break;
             case 'b':
             {
                 SmartArrayUInt8 arrB = readBoolArray();
-                node->addProperty(new PropertyBoolArray("", arrB));
+                node->addProperty(new PropertyBoolArray(arrB));
             }
                 break;
 
             case 'S':
             {
                 String str = readStringProp();
-                node->addProperty(new PropertyString("", str));
+                node->addProperty(new PropertyString(str));
             }
                 break;
             case 'R':
             {
                 SmartArrayUInt8 raw = readUInt8RawProp();
-                node->addProperty(new PropertyRawByteArray("", raw));
+                node->addProperty(new PropertyRawByteArray(raw));
             }
                 break;
 

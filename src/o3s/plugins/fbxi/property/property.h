@@ -37,16 +37,14 @@ public:
         PROP_FLOAT64_ARRAY
     };
 
-    Property(const String &name, Type type);
+    Property(Type type);
 
     virtual ~Property();
 
     inline Type type() const { return m_type; }
-    inline const String& name() const { return m_name; }
 
 protected:
 
-    String m_name;
     Type m_type;
 };
 

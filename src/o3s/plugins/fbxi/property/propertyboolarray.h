@@ -19,8 +19,8 @@ class PropertyBoolArray : public Property
 {
 public:
 
-    PropertyBoolArray(const String &name, SmartArrayUInt8 &value) :
-        Property(name, PROP_BOOL_ARRAY),
+    PropertyBoolArray(SmartArrayUInt8 &value) :
+        Property(PROP_BOOL_ARRAY),
         m_value(value)
     {
 

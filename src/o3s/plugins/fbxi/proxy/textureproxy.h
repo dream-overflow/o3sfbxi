@@ -1,0 +1,4 @@
+#ifndef TEXTUREPROXY_H
+#define TEXTUREPROXY_H
+
+#endif // TEXTUREPROXY_H

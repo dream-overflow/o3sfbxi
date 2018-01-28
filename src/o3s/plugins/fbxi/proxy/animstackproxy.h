@@ -1,0 +1,4 @@
+#ifndef ANIMSTACKPROXY_H
+#define ANIMSTACKPROXY_H
+
+#endif // ANIMSTACKPROXY_H
