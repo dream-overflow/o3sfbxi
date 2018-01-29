@@ -18,6 +18,7 @@
 #include <o3d/studio/common/workspace/hub.h>
 
 #include <o3d/core/vector3.h>
+#include <o3d/core/stringmap.h>
 
 namespace o3d {
 namespace studio {
@@ -44,6 +45,7 @@ private:
 
     common::ImporterOption *m_options;
     common::Entity *m_parent;
+    StringMap<common::Hub*> m_hubs;   //!< Key if Type::Name
 
     FbxImportDefinition *m_def;
 

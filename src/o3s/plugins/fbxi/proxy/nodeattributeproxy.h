@@ -23,9 +23,12 @@ public:
 
     /**
      * @brief NodeAttributeProxy
-     * @param node Node named Definitions
+     * @param node Node named NodeAttribute
      */
     NodeAttributeProxy(FBXNode *node);
+
+    String name();
+    String typeName();
 };
 
 } // namespace fbxi

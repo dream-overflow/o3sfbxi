@@ -62,35 +62,63 @@ ObjectsProxy::ObjectType ObjectsProxy::objectType(o3d::UInt32 i)
 
 ModelProxy* ObjectsProxy::model(o3d::UInt32 i)
 {
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new ModelProxy(node);
+    }
     return nullptr;
 }
 
 MaterialProxy* ObjectsProxy::material(o3d::UInt32 i)
 {
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new MaterialProxy(node);
+    }
     return nullptr;
 }
 
 CameraProxy* ObjectsProxy::camera(o3d::UInt32 i)
 {
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new CameraProxy(node);
+    }
     return nullptr;
 }
 
 LightProxy* ObjectsProxy::light(o3d::UInt32 i)
 {
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new LightProxy(node);
+    }
     return nullptr;
 }
 
 TextureProxy* ObjectsProxy::texture(o3d::UInt32 i)
 {
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new TextureProxy(node);
+    }
     return nullptr;
 }
 
 NodeAttributeProxy* ObjectsProxy::nodeAttribute(o3d::UInt32 i)
 {
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new NodeAttributeProxy(node);
+    }
     return nullptr;
 }
 
 GeometryProxy* ObjectsProxy::geometry(o3d::UInt32 i)
 {
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new GeometryProxy(node);
+    }
     return nullptr;
 }

@@ -20,8 +20,19 @@ NodeAttributeProxy::NodeAttributeProxy(FBXNode *node) :
     Proxy(node)
 {
     if (!m_node || m_node->name() != "NodeAttribute") {
-        O3D_ERROR(E_InvalidParameter("Must be an NodeAttribute node"));
+        O3D_ERROR(E_InvalidParameter("Must be a NodeAttribute node"));
     }
 
     // @todo check Version == 100
+}
+
+o3d::String NodeAttributeProxy::name()
+{
+    String name; // @todo = m_node->name();
+    return name;
+}
+
+o3d::String NodeAttributeProxy::typeName()
+{
+    return String("NodeAttribute::") + name();
 }

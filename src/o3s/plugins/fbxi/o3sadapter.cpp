@@ -25,6 +25,17 @@
 #include "proxy/nodeattributeproxy.h"
 #include "proxy/geometryproxy.h"
 
+#include <o3d/studio/common/component/spacialnodehub.h>
+#include <o3d/studio/common/component/meshhub.h>
+#include <o3d/studio/common/component/camerahub.h>
+// #include <o3d/studio/common/component/lighthub.h>
+// #include <o3d/studio/common/component/materialhub.h>
+// #include <o3d/studio/common/component/texturehub.h>
+// #include <o3d/studio/common/component/skeletonhub.h>
+// #include <o3d/studio/common/component/animationlayerhub.h>
+// #include <o3d/studio/common/component/animationtrackhub.h>
+// #include <o3d/studio/common/component/animationnodehub.h>
+
 #include <o3d/studio/common/objectref.h>
 #include <o3d/studio/common/component/dummyhub.h>
 
@@ -50,7 +61,9 @@ O3SAdapter::O3SAdapter(Parser *parser,
 
 O3SAdapter::~O3SAdapter()
 {
-
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        delete it->second;
+    }
 }
 
 o3d::Bool O3SAdapter::processImport()
@@ -86,6 +99,7 @@ o3d::Bool O3SAdapter::processImportLazy()
 
 void O3SAdapter::setupDef()
 {
+    // global informations about this document
     FBXNode *node = m_parser->child("FBXHeaderExtension");
     if (node) {
         HeaderProxy *hp = new HeaderProxy(node);
@@ -95,6 +109,7 @@ void O3SAdapter::setupDef()
         delete hp;
     }
 
+    // global settings of the data format (for transform, and details)
     node = m_parser->child("GlobalSettings");
     if (node) {
         GlobalSettingsProxy *gs = new GlobalSettingsProxy(node);
@@ -109,10 +124,12 @@ void O3SAdapter::setupDef()
         delete gs;
     }
 
+    // definitions of the templates
     node = m_parser->child("Definitions");
     if (node) {
         DefinitionsProxy *definitions = new DefinitionsProxy(node);
-        // @todo
+
+        // @todo TemplateProxy ... apply template to objects after ...
         Int32 count = definitions->count();
 
         delete definitions;
@@ -153,6 +170,12 @@ void O3SAdapter::setupDef()
                 case ObjectsProxy::OBJECT_NODE_ATTRIBUTE:
                 {
                     NodeAttributeProxy *np = objects->nodeAttribute(i);
+                    common::SpacialNodeHub *hub = new common::SpacialNodeHub(np->name());
+
+                    // parent will be know during connections
+                    m_hubs[np->typeName()] = hub;
+
+                    delete np;
                 }
                     break;
                 case ObjectsProxy::OBJECT_TEXTURE:
@@ -171,6 +194,8 @@ void O3SAdapter::setupDef()
     node = m_parser->child("Connections");
     if (node) {
         ConnectionsProxy *connections = new ConnectionsProxy(node);
+
+        // setup connections between objects
         // @todo
 
         delete connections;

@@ -147,8 +147,10 @@ o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
     FBXNode *node = new FBXNode(name);
     if (parent) {
         parent->addChild(node);
+        System::print(name, String("subnode ") + parent->name());
     } else {
         m_nodes.push_back(node);
+        System::print(name, "new node");
     }
 
     Int8 propType;
