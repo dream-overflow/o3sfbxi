@@ -26,6 +26,10 @@ public:
      * @param node Node named Model
      */
     ModelProxy(FBXNode *node);
+
+    Vector3 position();
+    Vector3 rotation();
+    Vector3 scale();
 };
 
 } // namespace fbxi

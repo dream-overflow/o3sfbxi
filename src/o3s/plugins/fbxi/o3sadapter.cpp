@@ -145,35 +145,47 @@ void O3SAdapter::setupDef()
                 case ObjectsProxy::OBJECT_CAMERA:
                 {
                     CameraProxy *cp = objects->camera(i);
+
+                    delete cp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_GEOMETRY:
                 {
                     GeometryProxy *gp = objects->geometry(i);
+
+
+
+                    delete gp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_LIGHT:
                 {
                     LightProxy *lp = objects->light(i);
+
+                    delete lp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_MATERIAL:
                 {
                     MaterialProxy *mp = objects->material(i);
+
+                    delete mp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_MODEL:
                 {
                     ModelProxy *mp = objects->model(i);
+
+                    delete mp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_NODE_ATTRIBUTE:
                 {
                     NodeAttributeProxy *np = objects->nodeAttribute(i);
-                    common::SpacialNodeHub *hub = new common::SpacialNodeHub(np->name());
+                    // common::SpacialNodeHub *hub = new common::SpacialNodeHub(np->name());
 
                     // parent will be know during connections
-                    m_hubs[np->typeName()] = hub;
+                    // m_hubs[np->typeName()] = hub;
 
                     delete np;
                 }
@@ -181,6 +193,8 @@ void O3SAdapter::setupDef()
                 case ObjectsProxy::OBJECT_TEXTURE:
                 {
                     TextureProxy *tp = objects->texture(i);
+
+                    delete tp;
                 }
                     break;
                 default:

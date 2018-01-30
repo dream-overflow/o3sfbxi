@@ -24,6 +24,16 @@ public:
      * @param node Node named Camera
      */
     GeometryProxy(FBXNode *node);
+
+    SmartArrayDouble vertices();
+    SmartArrayDouble normals();
+    SmartArrayDouble uvs();
+    SmartArrayInt32 indexes();
+    SmartArrayInt32 edges();
+
+private:
+
+    Int32 m_version;
 };
 
 } // namespace fbxi

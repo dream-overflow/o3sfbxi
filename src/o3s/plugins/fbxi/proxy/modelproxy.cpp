@@ -25,3 +25,40 @@ ModelProxy::ModelProxy(FBXNode *node) :
 
     // @todo check Version == 100
 }
+
+
+o3d::Vector3 ModelProxy::position()
+{
+    FBXNode *p70 = m_node->child("Properties70");
+    Vector3 pos;
+//    if (p70) {
+//        pos = p70->interpretAsVector3();
+//        "Lcl Translation"
+//    }
+
+    return pos;
+}
+
+o3d::Vector3 ModelProxy::rotation()
+{
+    FBXNode *p70 = m_node->child("Properties70");
+    Vector3 rot;
+//    if (p70) {
+//        pos = p70->interpretAsVector3();
+//        "Lcl Rotation"
+//    }
+
+    return rot;
+}
+
+o3d::Vector3 ModelProxy::scale()
+{
+    FBXNode *p70 = m_node->child("Properties70");
+    Vector3 scale;
+//    if (p70) {
+//        pos = p70->interpretAsVector3();
+//        "Lcl Scaling"
+//    }
+
+    return scale;
+}
