@@ -32,8 +32,6 @@ public:
     SmartArrayInt32 edges();
 
 private:
-
-    Int32 m_version;
 };
 
 } // namespace fbxi

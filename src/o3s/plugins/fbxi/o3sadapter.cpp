@@ -175,6 +175,14 @@ void O3SAdapter::setupDef()
                 case ObjectsProxy::OBJECT_MODEL:
                 {
                     ModelProxy *mp = objects->model(i);
+                    common::SpacialNodeHub *hub = new common::SpacialNodeHub(mp->name());
+
+                    hub->setPosition(0, mp->position());
+                    hub->setRotation(0, mp->rotation());
+                    hub->setScale(0, mp->scale());
+
+                    // parent will be know during connections
+                    m_hubs[np->typeName()] = hub;
 
                     delete mp;
                 }

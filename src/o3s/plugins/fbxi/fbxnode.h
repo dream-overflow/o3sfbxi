@@ -27,6 +27,7 @@ public:
     virtual ~FBXNode();
 
     const String& name() const;
+    Int32 version() const;
 
     void addChild(FBXNode *child);
     FBXNode *child(const String &name);
@@ -64,6 +65,7 @@ public:
 protected:
 
     String m_name;
+    Int32 m_version;
 
     std::list<FBXNode*> m_nodes;
     std::vector<Property*> m_properties;

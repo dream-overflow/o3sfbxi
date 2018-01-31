@@ -23,7 +23,14 @@ ModelProxy::ModelProxy(FBXNode *node) :
         O3D_ERROR(E_InvalidParameter("Must be a Model node"));
     }
 
-    // @todo check Version == 100
+    FBXNode *version = m_node->child("Version");
+    if (version) {
+        m_version = version->directAsInt32();
+    }
+
+    if (m_version != 232) {
+        O3D_ERROR(E_InvalidParameter("Must be a Model node version 232"));
+    }
 }
 
 

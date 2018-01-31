@@ -25,10 +25,13 @@ GeometryProxy::GeometryProxy(FBXNode *node) :
         O3D_ERROR(E_InvalidParameter("Must be a Geometry node"));
     }
 
-    // @todo check Version == 124
     FBXNode *version = m_node->child("GeometryVersion");
     if (version) {
         m_version = version->directAsInt32();
+    }
+
+    if (m_version != 124) {
+        O3D_ERROR(E_InvalidParameter("Must be a Geometry node version 124"));
     }
 }
 
