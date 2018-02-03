@@ -9,13 +9,13 @@
 #ifndef _O3DS_FBXI_GEOMETRYPROXY_H
 #define _O3DS_FBXI_GEOMETRYPROXY_H
 
-#include "proxy.h"
+#include "objectproxy.h"
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class GeometryProxy : public Proxy
+class GeometryProxy : public ObjectProxy
 {
 public:
 

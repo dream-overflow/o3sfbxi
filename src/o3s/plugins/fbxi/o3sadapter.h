@@ -39,18 +39,20 @@ public:
     virtual Bool processImport() override;
     virtual Bool processImportLazy() override;
 
+    common::Hub* hub(Int64 uid);
+
 private:
 
     Parser *m_parser;
 
     common::ImporterOption *m_options;
     common::Entity *m_parent;
-    StringMap<common::Hub*> m_hubs;   //!< Key if Type::Name
+    std::map<Int64, common::Hub*> m_hubs;   //!< Key if Type::Name
 
     FbxImportDefinition *m_def;
 
     void setupDef();
-    void setupAsset(common::Asset* asset);
+//    void setupAsset(common::Asset* asset);
     void setupHub(common::Hub* rootHub);
 
     Vector3 m_upAxis;

@@ -19,7 +19,7 @@
 using namespace o3d::studio::fbxi;
 
 GeometryProxy::GeometryProxy(FBXNode *node) :
-    Proxy(node)
+    ObjectProxy(node)
 {
     if (!m_node || m_node->name() != "Geometry") {
         O3D_ERROR(E_InvalidParameter("Must be a Geometry node"));

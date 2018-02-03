@@ -22,9 +22,12 @@ public:
     Proxy(FBXNode *node);
     virtual ~Proxy();
 
+    virtual Int32 version();
+
 protected:
 
     FBXNode *m_node;
+    Int32 m_version;
 };
 
 } // namespace fbxi

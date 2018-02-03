@@ -17,7 +17,7 @@
 using namespace o3d::studio::fbxi;
 
 MaterialProxy::MaterialProxy(FBXNode *node) :
-    Proxy(node)
+    ObjectProxy(node)
 {
     if (!m_node || m_node->name() != "Material") {
         O3D_ERROR(E_InvalidParameter("Must be a Material node"));

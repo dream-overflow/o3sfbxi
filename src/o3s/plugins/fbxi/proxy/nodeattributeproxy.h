@@ -9,7 +9,7 @@
 #ifndef _O3DS_FBXI_NODEATTRIBUTEPROXY_H
 #define _O3DS_FBXI_NODEATTRIBUTEPROXY_H
 
-#include "proxy.h"
+#include "objectproxy.h"
 #include <o3d/core/vector3.h>
 #include <o3d/image/color.h>
 
@@ -17,7 +17,7 @@ namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class NodeAttributeProxy : public Proxy
+class NodeAttributeProxy : public ObjectProxy
 {
 public:
 
@@ -26,9 +26,6 @@ public:
      * @param node Node named NodeAttribute
      */
     NodeAttributeProxy(FBXNode *node);
-
-    String name();
-    String typeName();
 };
 
 } // namespace fbxi

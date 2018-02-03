@@ -9,13 +9,13 @@
 #ifndef _O3DS_FBXI_CAMERAPROXY_H
 #define _O3DS_FBXI_CAMERAPROXY_H
 
-#include "proxy.h"
+#include "objectproxy.h"
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class CameraProxy : public Proxy
+class CameraProxy : public ObjectProxy
 {
 public:
 

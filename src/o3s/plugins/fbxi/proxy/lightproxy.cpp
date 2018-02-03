@@ -17,7 +17,7 @@
 using namespace o3d::studio::fbxi;
 
 LightProxy::LightProxy(FBXNode *node) :
-    Proxy(node)
+    ObjectProxy(node)
 {
     if (!m_node || m_node->name() != "Light") {
         O3D_ERROR(E_InvalidParameter("Must be a Light node"));

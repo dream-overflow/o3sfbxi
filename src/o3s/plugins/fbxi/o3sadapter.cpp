@@ -25,6 +25,10 @@
 #include "proxy/nodeattributeproxy.h"
 #include "proxy/geometryproxy.h"
 
+#include <o3d/studio/common/objectref.h>
+#include <o3d/studio/common/application.h>
+
+#include <o3d/studio/common/component/componentregistry.h>
 #include <o3d/studio/common/component/spacialnodehub.h>
 #include <o3d/studio/common/component/meshhub.h>
 #include <o3d/studio/common/component/camerahub.h>
@@ -36,6 +40,7 @@
 // #include <o3d/studio/common/component/animationtrackhub.h>
 // #include <o3d/studio/common/component/animationnodehub.h>
 
+#include <o3d/studio/common/workspace/project.h>
 #include <o3d/studio/common/objectref.h>
 #include <o3d/studio/common/component/dummyhub.h>
 
@@ -73,20 +78,13 @@ o3d::Bool O3SAdapter::processImport()
     // read interesting definitions
     setupDef();
 
-    if (m_parent->ref().light().baseTypeOf(common::TypeRef::asset())) {
-        common::Asset *asset = static_cast<common::Asset*>(m_parent);
-        setupAsset(asset);
-
-        topLevelHub = new common::DummyHub("Asset root hub", m_parent);
+    if (m_parent->ref().light().baseTypeOf(common::TypeRef::project())) {
+        common::Project *project = static_cast<common::Project*>(m_parent);
     } else if (m_parent->ref().light().baseTypeOf(common::TypeRef::hub())) {
         topLevelHub = static_cast<common::Hub*>(m_parent);
     }
 
-    if (topLevelHub) {
-        setupHub(topLevelHub);
-    } else {
-        return False;
-    }
+    setupHub(topLevelHub);
 
     return True;
 }
@@ -97,8 +95,20 @@ o3d::Bool O3SAdapter::processImportLazy()
     return False;
 }
 
+o3d::studio::common::Hub *O3SAdapter::hub(o3d::Int64 uid)
+{
+    auto it = m_hubs.find(uid);
+    if (it != m_hubs.end()) {
+        return it->second;
+    }
+
+    return nullptr;
+}
+
 void O3SAdapter::setupDef()
 {
+    common::Project *project = m_parent->project();
+
     // global informations about this document
     FBXNode *node = m_parser->child("FBXHeaderExtension");
     if (node) {
@@ -138,36 +148,53 @@ void O3SAdapter::setupDef()
     node = m_parser->child("Objects");
     if (node) {
         ObjectsProxy *objects = new ObjectsProxy(node);
-        // @todo
 
         for (UInt32 i = 0; i < objects->numObjects(); ++i) {
             switch (objects->objectType(i)) {
                 case ObjectsProxy::OBJECT_CAMERA:
                 {
                     CameraProxy *cp = objects->camera(i);
+//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::camerahub");
+//                    common::CameraHub *hub = static_cast<common::CameraHub*>(component->buildHub(cp->name(), project, project));
 
+                    // @todo ortho, fov...
+
+            //        m_hubs[cp->uuid()] = hub;
                     delete cp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_GEOMETRY:
                 {
                     GeometryProxy *gp = objects->geometry(i);
+               //     common::MeshHub *hub = new common::MeshHub(gp->name());
 
+                    // @todo explode vertices, uvs...
+                    // hub->setVertices(gp->vertices());
 
-
+                    // probably used by a model node
+                //    m_hubs[gp->uuid()] = hub;
                     delete gp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_LIGHT:
                 {
                     LightProxy *lp = objects->light(i);
+                    // common::LightHub *hub = new common::LightHub(mp->name());
 
+                    // @todo ambient, diffuse, specular, type, size...
+
+                    // m_hubs[mp->typeName()] = hub;
                     delete lp;
                 }
                     break;
                 case ObjectsProxy::OBJECT_MATERIAL:
                 {
                     MaterialProxy *mp = objects->material(i);
+//                    common::MaterialHub *hub = new common::MaterialHub(mp->name());
+
+//                    // @todo ambient, diffuse, specular, transparency...
+
+//                    m_hubs[mp->uuid()] = hub;
 
                     delete mp;
                 }
@@ -175,14 +202,16 @@ void O3SAdapter::setupDef()
                 case ObjectsProxy::OBJECT_MODEL:
                 {
                     ModelProxy *mp = objects->model(i);
-                    common::SpacialNodeHub *hub = new common::SpacialNodeHub(mp->name());
+
+                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Node " + mp->name(), project, project));
 
                     hub->setPosition(0, mp->position());
                     hub->setRotation(0, mp->rotation());
                     hub->setScale(0, mp->scale());
 
                     // parent will be know during connections
-                    m_hubs[np->typeName()] = hub;
+                    m_hubs[mp->uuid()] = hub;
 
                     delete mp;
                 }
@@ -190,10 +219,12 @@ void O3SAdapter::setupDef()
                 case ObjectsProxy::OBJECT_NODE_ATTRIBUTE:
                 {
                     NodeAttributeProxy *np = objects->nodeAttribute(i);
-                    // common::SpacialNodeHub *hub = new common::SpacialNodeHub(np->name());
+
+                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub(np->name(), project, project));
 
                     // parent will be know during connections
-                    // m_hubs[np->typeName()] = hub;
+                    m_hubs[np->uuid()] = hub;
 
                     delete np;
                 }
@@ -201,6 +232,9 @@ void O3SAdapter::setupDef()
                 case ObjectsProxy::OBJECT_TEXTURE:
                 {
                     TextureProxy *tp = objects->texture(i);
+                    // @todo add a TextureHub ?
+
+                    // @todo
 
                     delete tp;
                 }
@@ -213,33 +247,72 @@ void O3SAdapter::setupDef()
         delete objects;
     }
 
-    node = m_parser->child("Connections");
+    m_def->m_unit = m_unitScale;
+}
+
+//void O3SAdapter::setupAsset(common::Asset* asset)
+//{
+//    FBXNode *node = m_parser->child("FBXHeaderExtension");
+//    if (node) {
+//        HeaderProxy *hp = new HeaderProxy(node);
+
+//        asset->setCreator(hp->creator());
+//        asset->setCreationTimeStamp(hp->creationTimeStamp());
+
+//        delete hp;
+//    }
+//}
+
+void O3SAdapter::setupHub(common::Hub* rootHub)
+{
+    common::Project *project = m_parent->project();
+
+    FBXNode *node = m_parser->child("Connections");
     if (node) {
         ConnectionsProxy *connections = new ConnectionsProxy(node);
 
         // setup connections between objects
-        // @todo
+        for (UInt32 i = 0; i < connections->numConnections(); ++i) {
+            if (connections->connectionType(i) == ConnectionsProxy::CONN_OO) {
+                Int64 parentUid, childUid;
+                connections->objectRelation(i, parentUid, childUid);
+
+                common::Hub* parentHub = hub(parentUid);
+                common::Hub* childHub = hub(childUid);
+
+                // not imported children ignore the connection
+                if (!childHub) {
+                    continue;
+                }
+
+                if (!childHub->ref().light().isValid()) {
+                    childHub->setRef(common::ObjectRef::buildRef(m_parent->project(), childHub->typeRef()));
+                }
+
+                // if parent is null, means root
+                if (!parentHub) {
+                    if (rootHub) {
+                        // reparent
+                        childHub->setParent(rootHub);
+                        rootHub->addHub(childHub);
+                    } else {
+                        // reparent
+                        childHub->setParent(project);
+                        project->addHub(childHub);
+                    }
+                } else {
+                    // reparent
+                    childHub->setParent(parentHub);
+                    parentHub->addHub(childHub);
+                }
+            } else if (connections->connectionType(i) == ConnectionsProxy::CONN_OP) {
+                // @todo mostly texture
+            }
+        }
 
         delete connections;
     }
 
-    m_def->m_unit = m_unitScale;
-}
-
-void O3SAdapter::setupAsset(common::Asset* asset)
-{
-    FBXNode *node = m_parser->child("FBXHeaderExtension");
-    if (node) {
-        HeaderProxy *hp = new HeaderProxy(node);
-
-        asset->setCreator(hp->creator());
-        asset->setCreationTimeStamp(hp->creationTimeStamp());
-
-        delete hp;
-    }
-}
-
-void O3SAdapter::setupHub(common::Hub* rootHub)
-{
-    // @todo all work here
+    // clear to avoid theirs destruction at destructor
+    m_hubs.clear();
 }

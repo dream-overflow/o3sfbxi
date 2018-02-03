@@ -27,7 +27,6 @@ public:
     virtual ~FBXNode();
 
     const String& name() const;
-    Int32 version() const;
 
     void addChild(FBXNode *child);
     FBXNode *child(const String &name);
@@ -51,7 +50,7 @@ public:
     Int32 directAsInt32() const;
 
     //
-    // Property conversion helpers for named named "P" or "PS"
+    // Property conversion helpers for named "P" or "PS"
     //
 
     Vector3 interpretAsVector3() const;
@@ -65,7 +64,6 @@ public:
 protected:
 
     String m_name;
-    Int32 m_version;
 
     std::list<FBXNode*> m_nodes;
     std::vector<Property*> m_properties;

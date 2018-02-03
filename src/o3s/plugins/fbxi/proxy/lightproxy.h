@@ -9,14 +9,14 @@
 #ifndef _O3DS_FBXI_LIGHTPROXY_H
 #define _O3DS_FBXI_LIGHTPROXY_H
 
-#include "proxy.h"
+#include "objectproxy.h"
 #include <o3d/image/color.h>
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class LightProxy : public Proxy
+class LightProxy : public ObjectProxy
 {
 public:
 

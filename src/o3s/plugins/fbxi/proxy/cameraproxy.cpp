@@ -17,7 +17,7 @@
 using namespace o3d::studio::fbxi;
 
 CameraProxy::CameraProxy(FBXNode *node) :
-    Proxy(node)
+    ObjectProxy(node)
 {
     if (!m_node || m_node->name() != "Camera") {
         O3D_ERROR(E_InvalidParameter("Must be a Camera node"));

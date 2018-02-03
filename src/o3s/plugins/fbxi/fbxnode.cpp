@@ -38,11 +38,6 @@ const o3d::String &FBXNode::name() const
     return m_name;
 }
 
-o3d::Int32 FBXNode::version() const
-{
-    return m_version;
-}
-
 void FBXNode::addChild(FBXNode *child)
 {
     m_nodes.push_back(child);

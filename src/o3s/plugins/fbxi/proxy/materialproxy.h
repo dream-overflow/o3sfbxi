@@ -9,13 +9,13 @@
 #ifndef _O3DS_FBXI_MATERIALPROXY_H
 #define _O3DS_FBXI_MATERIALPROXY_H
 
-#include "proxy.h"
+#include "objectproxy.h"
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class MaterialProxy : public Proxy
+class MaterialProxy : public ObjectProxy
 {
 public:
 
