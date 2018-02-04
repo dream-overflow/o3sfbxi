@@ -47,21 +47,34 @@ o3d::SmartArrayDouble GeometryProxy::vertices()
         array = data->value();
     }
 
+    // @todo process
+
     return array;
 }
 
-o3d::SmartArrayDouble GeometryProxy::normals()
+o3d::SmartArrayFloat GeometryProxy::normals()
 {
-    SmartArrayDouble array;
+    SmartArrayFloat normals;
 
-//    [INFO] subnode Geometry: LayerElementNormal
-//    [INFO] subnode LayerElementNormal: Version
-//    [INFO] subnode LayerElementNormal: Name
-//    [INFO] subnode LayerElementNormal: MappingInformationType
-//    [INFO] subnode LayerElementNormal: ReferenceInformationType
-//    [INFO] subnode LayerElementNormal: Normals
+    SmartArrayDouble data;
+    SmartArrayInt32 indices;
 
-    return array;
+    FBXNode *layerElementNormal = m_node->child("LayerElementNormal");
+    if (!layerElementNormal) {
+        return normals;
+    }
+
+    MapType mapType;
+    vertexData(layerElementNormal,
+               "Normals",
+               "NormalsIndex",
+               data,
+               indices,
+               mapType);
+
+    // @todo process normals
+
+    return normals;
 }
 
 //
@@ -85,6 +98,8 @@ o3d::SmartArrayDouble GeometryProxy::normals()
 o3d::SmartArrayDouble GeometryProxy::uvs()
 {
     SmartArrayDouble array;
+
+    // @todo process
 
     return array;
 }
@@ -113,4 +128,78 @@ o3d::SmartArrayInt32 GeometryProxy::edges()
     }
 
     return array;
+}
+
+o3d::Bool GeometryProxy::processGeometry()
+{
+    // @todo
+    return True;
+}
+
+o3d::Bool GeometryProxy::vertexData(
+        FBXNode *node,
+        const o3d::String &name,
+        const o3d::String &indexName,
+        o3d::SmartArrayDouble &data,
+        o3d::SmartArrayInt32 &indices,
+        MapType &mapType)
+{
+    if (!node) {
+        return False;
+    }
+
+    FBXNode *version = node->child("Version");
+    if (!version || version->directAsInt32() != 232) {
+        O3D_ERROR(E_InvalidFormat(String("Must be a {0} node version 232").arg(node->name())));
+    }
+
+    FBXNode *mappingInformationType = node->child("MappingInformationType");
+    if (!mappingInformationType) {
+        O3D_ERROR(E_InvalidFormat("Missing MappingInformationType node"));
+    }
+
+    String mapTypeName = mappingInformationType->directAsString();
+    if (mapTypeName == "ByPolygonVertex") {
+        mapType = BY_POLYGON_VERTEX;
+    } else if (mapTypeName == "ByPolygon") {
+        mapType = BY_POLYGON;
+    } else if (mapTypeName == "ByVertice" || mapTypeName == "ByVertex") {
+        mapType = BY_VERTEX;
+    }
+
+    FBXNode *referenceInformationType = node->child("ReferenceInformationType");
+    if (!referenceInformationType) {
+        O3D_ERROR(E_InvalidFormat("Missing ReferenceInformationType node"));
+    }
+
+    String refEltName = referenceInformationType->directAsString();
+    if (refEltName == "IndexToDirect") {
+        FBXNode *indicesData = node->child(indexName);
+        if (!indicesData) {
+            O3D_ERROR(E_InvalidFormat(String("Missing {0} node").arg(name)));
+        }
+
+        PropertyInt32Array *indicesArray = static_cast<PropertyInt32Array*>(indicesData->property(0));
+        if (!indicesArray) {
+            O3D_ERROR(E_InvalidFormat(String("Missing {0} data").arg(indexName)));
+        }
+
+        indices = indicesArray->value();
+    } else if (refEltName != "Direct") {
+        O3D_ERROR(E_InvalidFormat("ReferenceInformationType is not Direct"));
+    }
+
+    FBXNode *dataNode = node->child(name);
+    if (!dataNode) {
+        O3D_ERROR(E_InvalidFormat(String("Missing {0} node").arg(name)));
+    }
+
+    PropertyFloat64Array *dataArray = static_cast<PropertyFloat64Array*>(dataNode->property(0));
+    if (!dataArray) {
+        O3D_ERROR(E_InvalidFormat(String("Missing {0} data").arg(name)));
+    }
+
+    data = dataArray->value();
+
+    return True;
 }

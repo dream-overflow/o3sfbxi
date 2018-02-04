@@ -26,12 +26,28 @@ public:
     GeometryProxy(FBXNode *node);
 
     SmartArrayDouble vertices();
-    SmartArrayDouble normals();
+    SmartArrayFloat normals();
     SmartArrayDouble uvs();
     SmartArrayInt32 indexes();
     SmartArrayInt32 edges();
 
+    Bool processGeometry();
+
 private:
+
+    enum MapType
+    {
+        BY_POLYGON_VERTEX,
+        BY_POLYGON,
+        BY_VERTEX
+    };
+
+    Bool vertexData(FBXNode *node,
+            const String& name,
+            const String &indexName,
+            SmartArrayDouble &data,
+            SmartArrayInt32 &indices,
+            MapType &mapType);
 };
 
 } // namespace fbxi
