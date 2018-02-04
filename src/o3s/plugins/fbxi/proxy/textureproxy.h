@@ -9,14 +9,14 @@
 #ifndef _O3DS_FBXI_TEXTUREPROXY_H
 #define _O3DS_FBXI_TEXTUREPROXY_H
 
-#include "proxy.h"
+#include "objectproxy.h"
 #include <o3d/image/color.h>
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class TextureProxy : public Proxy
+class TextureProxy : public ObjectProxy
 {
 public:
 

@@ -24,6 +24,8 @@ namespace o3d {
 namespace studio {
 namespace fbxi {
 
+class ObjectProxy;
+
 class O3S_PLUGIN_API O3SAdapter : public Adapter
 {
 public:
@@ -40,6 +42,7 @@ public:
     virtual Bool processImportLazy() override;
 
     common::Hub* hub(Int64 uid);
+    ObjectProxy* objectProxy(Int64 uid);
 
 private:
 
@@ -47,13 +50,13 @@ private:
 
     common::ImporterOption *m_options;
     common::Entity *m_parent;
-    std::map<Int64, common::Hub*> m_hubs;   //!< Key if Type::Name
+
+    std::map<Int64, common::Hub*> m_hubs;
+    std::map<Int64, ObjectProxy*> m_objects;
 
     FbxImportDefinition *m_def;
 
-    void setupDef();
-//    void setupAsset(common::Asset* asset);
-    void setupHub(common::Hub* rootHub);
+    void setupDef(common::Hub *topLevelHub);
 
     Vector3 m_upAxis;
     Vector3 m_frontAxis;

@@ -1,12 +1,12 @@
 /**
- * @brief FBX light data proxy
+ * @brief FBX mesh data proxy
  * @copyright Copyright (C) 2018 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
- * @date 2018-01-29
+ * @date 2018-02-04
  * @details
  */
 
-#include "lightproxy.h"
+#include "meshproxy.h"
 #include <o3d/core/debug.h>
 
 #include "../property/propertystring.h"
@@ -16,24 +16,24 @@
 
 using namespace o3d::studio::fbxi;
 
-LightNodeProxy::LightNodeProxy(FBXNode *node) :
+MeshNodeProxy::MeshNodeProxy(FBXNode *node) :
     NodeAttributeProxy(node)
 {
-    if (subClass() != "Light") {
-        O3D_ERROR(E_InvalidParameter("Must be sub class Light"));
+    if (subClass() != "Mesh") {
+        O3D_ERROR(E_InvalidParameter("Must be sub class mesh"));
     }
 
     // @todo check Version == 100
-    m_objectType = OBJECT_LIGHT_NODE_ATTR;
+    m_objectType = OBJECT_MESH_NODE_ATTR;
 }
 
-LightModelProxy::LightModelProxy(FBXNode *node) :
+MeshModelProxy::MeshModelProxy(FBXNode *node) :
     ModelProxy(node)
 {
-    if (subClass() != "Light") {
-        O3D_ERROR(E_InvalidParameter("Must be sub class Light"));
+    if (subClass() != "Mesh") {
+        O3D_ERROR(E_InvalidParameter("Must be sub class mesh"));
     }
 
     // @todo check Version == 100
-    m_objectType = OBJECT_LIGHT_MODEL;
+    m_objectType = OBJECT_MESH_MODEL;
 }

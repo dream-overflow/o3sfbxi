@@ -9,21 +9,33 @@
 #ifndef _O3DS_FBXI_CAMERAPROXY_H
 #define _O3DS_FBXI_CAMERAPROXY_H
 
-#include "objectproxy.h"
+#include "nodeattributeproxy.h"
+#include "modelproxy.h"
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class CameraProxy : public ObjectProxy
+class CameraNodeProxy : public NodeAttributeProxy
 {
 public:
 
     /**
-     * @brief CameraProxy
-     * @param node Node named Camera
+     * @brief CameraNodeProxy
+     * @param node Node subclassed Camera
      */
-    CameraProxy(FBXNode *node);
+    CameraNodeProxy(FBXNode *node);
+};
+
+class CameraModelProxy : public ModelProxy
+{
+public:
+
+    /**
+     * @brief CameraModelProxy
+     * @param node Node subclassed Camera
+     */
+    CameraModelProxy(FBXNode *node);
 };
 
 } // namespace fbxi

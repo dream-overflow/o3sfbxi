@@ -9,22 +9,35 @@
 #ifndef _O3DS_FBXI_LIGHTPROXY_H
 #define _O3DS_FBXI_LIGHTPROXY_H
 
-#include "objectproxy.h"
+#include "modelproxy.h"
+#include "nodeattributeproxy.h"
+
 #include <o3d/image/color.h>
 
 namespace o3d {
 namespace studio {
 namespace fbxi {
 
-class LightProxy : public ObjectProxy
+class LightNodeProxy : public NodeAttributeProxy
 {
 public:
 
     /**
-     * @brief LightProxy
-     * @param node Node named Light
+     * @brief LightNodeProxy
+     * @param node Node subclassed Light
      */
-    LightProxy(FBXNode *node);
+    LightNodeProxy(FBXNode *node);
+};
+
+class LightModelProxy : public ModelProxy
+{
+public:
+
+    /**
+     * @brief LightModelProxy
+     * @param node Node subclassed Light
+     */
+    LightModelProxy(FBXNode *node);
 };
 
 } // namespace fbxi

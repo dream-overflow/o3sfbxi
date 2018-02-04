@@ -16,12 +16,24 @@
 
 using namespace o3d::studio::fbxi;
 
-CameraProxy::CameraProxy(FBXNode *node) :
-    ObjectProxy(node)
+CameraNodeProxy::CameraNodeProxy(FBXNode *node) :
+    NodeAttributeProxy(node)
 {
-    if (!m_node || m_node->name() != "Camera") {
-        O3D_ERROR(E_InvalidParameter("Must be a Camera node"));
+    if (subClass() != "Camera") {
+        O3D_ERROR(E_InvalidParameter("Must be sub class camera"));
     }
 
     // @todo check Version == 100
+    m_objectType = OBJECT_CAMERA_NODE_ATTR;
+}
+
+CameraModelProxy::CameraModelProxy(FBXNode *node) :
+    ModelProxy(node)
+{
+    if (subClass() != "Camera") {
+        O3D_ERROR(E_InvalidParameter("Must be sub class camera"));
+    }
+
+    // @todo check Version == 100
+    m_objectType = OBJECT_CAMERA_MODEL;
 }

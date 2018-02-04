@@ -1,12 +1,12 @@
 /**
- * @brief FBX texture data proxy
+ * @brief FBX bone data proxy
  * @copyright Copyright (C) 2018 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
- * @date 2018-01-29
+ * @date 2018-01-04
  * @details
  */
 
-#include "textureproxy.h"
+#include "boneproxy.h"
 #include <o3d/core/debug.h>
 
 #include "../property/propertystring.h"
@@ -16,13 +16,13 @@
 
 using namespace o3d::studio::fbxi;
 
-TextureProxy::TextureProxy(FBXNode *node) :
-    ObjectProxy(node)
+BoneModelProxy::BoneModelProxy(FBXNode *node) :
+    ModelProxy(node)
 {
-    if (!m_node || m_node->name() != "Texture") {
-        O3D_ERROR(E_InvalidParameter("Must be a Texture node"));
+    if (subClass() != "LimbNode") {
+        O3D_ERROR(E_InvalidParameter("Must be sub class LimbNode"));
     }
 
     // @todo check Version == 100
-    m_objectType = OBJECT_TEXTURE;
+    m_objectType = OBJECT_LIMB_NODE_MODEL;
 }

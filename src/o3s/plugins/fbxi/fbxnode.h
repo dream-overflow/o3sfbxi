@@ -32,6 +32,9 @@ public:
     FBXNode *child(const String &name);
     FBXNode *childAt(UInt32 i);
 
+    std::list<FBXNode*>::iterator begin();
+    std::list<FBXNode*>::iterator end();
+
     void addProperty(Property *property);
     const Property* property(UInt32 idx) const;
     Property* property(UInt32 idx);
@@ -48,6 +51,7 @@ public:
     //
 
     Int32 directAsInt32() const;
+    String directAsString() const;
 
     //
     // Property conversion helpers for named "P" or "PS"

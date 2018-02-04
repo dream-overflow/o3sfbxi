@@ -13,6 +13,8 @@
 #include <o3d/core/vector3.h>
 #include <o3d/image/color.h>
 
+#include <list>
+
 namespace o3d {
 namespace studio {
 namespace fbxi {
@@ -30,6 +32,24 @@ public:
     Vector3 position();
     Vector3 rotation();
     Vector3 scale();
+
+    ModelProxy* recursiveNext(std::list<std::list<ModelProxy*>::iterator> &cursor);
+
+protected:
+
+    ModelProxy *m_parent;
+    std::vector<ModelProxy*> m_children;
+};
+
+class RootProxy : public ModelProxy
+{
+public:
+
+    /**
+     * @brief RootProxy
+     * @param node Node named Model subclass Root.
+     */
+    RootProxy(FBXNode *node);
 };
 
 } // namespace fbxi

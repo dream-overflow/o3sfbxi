@@ -40,6 +40,16 @@ o3d::Int32 Proxy::version()
     return m_version;
 }
 
+FBXNode *Proxy::node()
+{
+    return m_node;
+}
+
+const FBXNode *Proxy::node() const
+{
+    return m_node;
+}
+
 HeaderProxy::HeaderProxy(FBXNode *node) :
     Proxy(node)
 {

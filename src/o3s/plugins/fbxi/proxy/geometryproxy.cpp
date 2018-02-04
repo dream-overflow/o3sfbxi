@@ -33,6 +33,8 @@ GeometryProxy::GeometryProxy(FBXNode *node) :
     if (m_version != 124) {
         O3D_ERROR(E_InvalidParameter("Must be a Geometry node version 124"));
     }
+
+    m_objectType = OBJECT_GEOMETRY;
 }
 
 o3d::SmartArrayDouble GeometryProxy::vertices()
@@ -112,4 +114,3 @@ o3d::SmartArrayInt32 GeometryProxy::edges()
 
     return array;
 }
-

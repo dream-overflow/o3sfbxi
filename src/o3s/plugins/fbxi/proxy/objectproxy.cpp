@@ -16,7 +16,8 @@
 using namespace o3d::studio::fbxi;
 
 ObjectProxy::ObjectProxy(FBXNode *node) :
-    Proxy(node)
+    Proxy(node),
+    m_objectType(OBJECT_UNDEFINED)
 {
 }
 
@@ -31,23 +32,34 @@ o3d::String ObjectProxy::name()
     }
 }
 
-o3d::Int64 ObjectProxy::uuid()
+ObjectProxy::ObjectType ObjectProxy::objectType() const
+{
+    return m_objectType;
+}
+
+o3d::Int64 ObjectProxy::uid()
 {
     if (m_node->property(0) && m_node->property(0)->type() == Property::PROP_INT64) {
         return static_cast<PropertyInt64*>(m_node->property(0))->value();
     }
+
+    return -1;
 }
 
 o3d::String ObjectProxy::className()
 {
-    if (m_node->property(0) && m_node->property(1)->type() == Property::PROP_STRING) {
+    if (m_node->property(1) && m_node->property(1)->type() == Property::PROP_STRING) {
         return static_cast<PropertyString*>(m_node->property(1))->value();
     }
+
+    return String();
 }
 
 o3d::String ObjectProxy::subClass()
 {
-    if (m_node->property(0) && m_node->property(2)->type() == Property::PROP_STRING) {
+    if (m_node->property(2) && m_node->property(2)->type() == Property::PROP_STRING) {
         return static_cast<PropertyString*>(m_node->property(2))->value();
     }
+
+    return String();
 }

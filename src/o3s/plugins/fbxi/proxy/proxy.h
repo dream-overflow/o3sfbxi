@@ -24,6 +24,9 @@ public:
 
     virtual Int32 version();
 
+    FBXNode *node();
+    const FBXNode *node() const;
+
 protected:
 
     FBXNode *m_node;

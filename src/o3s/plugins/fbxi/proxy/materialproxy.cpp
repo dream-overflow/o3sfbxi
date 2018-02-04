@@ -24,4 +24,5 @@ MaterialProxy::MaterialProxy(FBXNode *node) :
     }
 
     // @todo check Version == 100
+    m_objectType = OBJECT_MATERIAL;
 }

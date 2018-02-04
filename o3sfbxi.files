@@ -6,6 +6,10 @@ src/o3s/plugins/fbxi/proxy/animlayerproxy.cpp
 src/o3s/plugins/fbxi/proxy/animlayerproxy.h
 src/o3s/plugins/fbxi/proxy/animstackproxy.cpp
 src/o3s/plugins/fbxi/proxy/animstackproxy.h
+src/o3s/plugins/fbxi/proxy/boneproxy.cpp
+src/o3s/plugins/fbxi/proxy/boneproxy.h
+src/o3s/plugins/fbxi/proxy/meshproxy.cpp
+src/o3s/plugins/fbxi/proxy/meshproxy.h
 src/o3s/plugins/fbxi/proxy/objectproxy.cpp
 src/o3s/plugins/fbxi/proxy/objectproxy.h
 src/o3s/plugins/fbxi/proxy/textureproxy.cpp

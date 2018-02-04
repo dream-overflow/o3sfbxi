@@ -70,6 +70,16 @@ FBXNode *FBXNode::childAt(o3d::UInt32 i)
     return nullptr;
 }
 
+std::list<FBXNode *>::iterator FBXNode::begin()
+{
+    return m_nodes.begin();
+}
+
+std::list<FBXNode *>::iterator FBXNode::end()
+{
+    return m_nodes.end();
+}
+
 void FBXNode::addProperty(Property *property)
 {
     if (property) {
@@ -148,6 +158,21 @@ o3d::Int32 FBXNode::directAsInt32() const
     }
 
     return i;
+}
+
+o3d::String FBXNode::directAsString() const
+{
+    String str;
+
+    if (m_properties.size() == 1) {
+        Property::Type typeDef = m_properties[0]->type();
+        if (typeDef == Property::PROP_STRING) {
+            PropertyString *pV = static_cast<PropertyString*>(m_properties[0]);
+            str = pV->value();
+        }
+    }
+
+    return str;
 }
 
 o3d::Vector3 FBXNode::interpretAsVector3() const
