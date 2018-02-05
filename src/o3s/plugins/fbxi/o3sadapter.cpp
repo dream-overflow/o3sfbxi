@@ -7,6 +7,8 @@
  */
 
 #include "o3sadapter.h"
+#include "loader.h"
+
 #include "proxy/headerproxy.h"
 #include "proxy/definitionsproxy.h"
 #include "proxy/objectsproxy.h"
@@ -57,6 +59,7 @@ O3SAdapter::O3SAdapter(Parser *parser,
         o3d::studio::common::Entity *parent,
         FbxImportDefinition* def) :
     m_parser(parser),
+    m_loader(nullptr),
     m_options(options),
     m_parent(parent),
     m_def(def),
@@ -72,25 +75,27 @@ O3SAdapter::O3SAdapter(Parser *parser,
 
 O3SAdapter::~O3SAdapter()
 {
-    // delete non assigned hubs (deletion is recursive)
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        common::Hub *hub = it->second;
-        if (!hub->parent()) {
-            delete hub;
-        } else {
-            if (hub->parent()->ref().light().baseTypeOf(common::TypeRef::project())) {
-                common::Project *project = static_cast<common::Project*>(hub->parent());
-                if (!project->hub(hub->ref().light())) {
-                    delete hub;
-                }
-            } else if (hub->parent()->ref().light().baseTypeOf(common::TypeRef::hub())) {
-                common::Hub *parentHub = static_cast<common::Hub*>(hub->parent());
-                if (!parentHub->hub(hub->ref().light())) {
-                    delete hub;
-                }
-            }
-        }
-    }
+    deletePtr(m_loader);
+
+//    // delete non assigned hubs (deletion is recursive)
+//    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+//        common::Hub *hub = it->second;
+//        if (!hub->parent()) {
+//            delete hub;
+//        } else {
+//            if (hub->parent()->ref().light().baseTypeOf(common::TypeRef::project())) {
+//                common::Project *project = static_cast<common::Project*>(hub->parent());
+//                if (!project->hub(hub->ref().light())) {
+//                    delete hub;
+//                }
+//            } else if (hub->parent()->ref().light().baseTypeOf(common::TypeRef::hub())) {
+//                common::Hub *parentHub = static_cast<common::Hub*>(hub->parent());
+//                if (!parentHub->hub(hub->ref().light())) {
+//                    delete hub;
+//                }
+//            }
+//        }
+//    }
 }
 
 o3d::Bool O3SAdapter::processImport()
@@ -101,15 +106,32 @@ o3d::Bool O3SAdapter::processImport()
         topLevelHub = static_cast<common::Hub*>(m_parent);
     }
 
-    setupDef(topLevelHub);
+    if (m_loader) {
+        delete m_loader;
+    }
+
+    m_loader = new Loader(m_parser, m_def);
+    m_loader->load();
+
+    toScene();
 
     return True;
 }
 
-o3d::Bool O3SAdapter::processImportLazy()
+o3d::Bool O3SAdapter::toScene()
 {
-    // @todo
-    return False;
+    // @todo from loader
+    // setup model node to editor
+    // @todo remove hub instances above
+//    ModelProxy *currentProxy = rootProxy;
+//    std::list<std::list<ModelProxy*>::iterator> cursor;
+
+//    while (currentProxy != nullptr) {
+//        // @todo type... creation...
+//        currentProxy = currentProxy->recursiveNext(cursor);
+//    }
+
+    return True;
 }
 
 o3d::studio::common::Hub *O3SAdapter::hub(o3d::Int64 uid)
@@ -122,416 +144,406 @@ o3d::studio::common::Hub *O3SAdapter::hub(o3d::Int64 uid)
     return nullptr;
 }
 
-ObjectProxy *O3SAdapter::objectProxy(o3d::Int64 uid)
-{
-    auto it = m_objects.find(uid);
-    if (it != m_objects.end()) {
-        return it->second;
-    }
+//void O3SAdapter::setupDef(common::Hub *topLevelHub)
+//{
+//    common::Project *project = m_parent->project();
 
-    return nullptr;
-}
+//    // global informations about this document
+//    FBXNode *node = m_parser->child("FBXHeaderExtension");
+//    if (node) {
+//        HeaderProxy *hp = new HeaderProxy(node);
+//        m_def->m_creator = hp->creator();
+//        m_def->m_creationTimestamp = hp->creationTimeStamp();
 
-void O3SAdapter::setupDef(common::Hub *topLevelHub)
-{
-    common::Project *project = m_parent->project();
+//        delete hp;
+//    }
 
-    // global informations about this document
-    FBXNode *node = m_parser->child("FBXHeaderExtension");
-    if (node) {
-        HeaderProxy *hp = new HeaderProxy(node);
-        m_def->m_creator = hp->creator();
-        m_def->m_creationTimestamp = hp->creationTimeStamp();
+//    // global settings of the data format (for transform, and details)
+//    node = m_parser->child("GlobalSettings");
+//    if (node) {
+//        GlobalSettingsProxy *gs = new GlobalSettingsProxy(node);
+//        m_unitScale = gs->unitScale();
+//        m_upAxis = gs->upAxis();
+//        m_frontAxis = gs->frontAxis();
+//        m_startTime = gs->timeSpanStart();
+//        m_endTime = gs->timeSpanEnd();
 
-        delete hp;
-    }
+//        m_def->m_ambientColor = gs->ambientColor();
 
-    // global settings of the data format (for transform, and details)
-    node = m_parser->child("GlobalSettings");
-    if (node) {
-        GlobalSettingsProxy *gs = new GlobalSettingsProxy(node);
-        m_unitScale = gs->unitScale();
-        m_upAxis = gs->upAxis();
-        m_frontAxis = gs->frontAxis();
-        m_startTime = gs->timeSpanStart();
-        m_endTime = gs->timeSpanEnd();
+//        delete gs;
+//    }
 
-        m_def->m_ambientColor = gs->ambientColor();
+//    // definitions of the templates
+//    node = m_parser->child("Definitions");
+//    if (node) {
+//        DefinitionsProxy *definitions = new DefinitionsProxy(node);
 
-        delete gs;
-    }
+//        // @todo TemplateProxy ... apply template to objects after ...
+//        Int32 count = definitions->count();
 
-    // definitions of the templates
-    node = m_parser->child("Definitions");
-    if (node) {
-        DefinitionsProxy *definitions = new DefinitionsProxy(node);
+//        delete definitions;
+//    }
 
-        // @todo TemplateProxy ... apply template to objects after ...
-        Int32 count = definitions->count();
+//    node = m_parser->child("Objects");
+//    if (node) {
+//        ObjectsProxy *objects = new ObjectsProxy(node);
 
-        delete definitions;
-    }
+//        for (UInt32 i = 0; i < objects->numObjects(); ++i) {
+//            switch (objects->objectType(i)) {
+//                case ObjectProxy::OBJECT_CAMERA_MODEL:
+//                {
+//                    // not very interesting
+//                    if (0) {
+//                        CameraModelProxy *cp = objects->cameraModel(i);
+//                        m_objects[cp->uid()] = cp;
 
-    node = m_parser->child("Objects");
-    if (node) {
-        ObjectsProxy *objects = new ObjectsProxy(node);
+//                        common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+//                        common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub(cp->name(), project, project));
 
-        for (UInt32 i = 0; i < objects->numObjects(); ++i) {
-            switch (objects->objectType(i)) {
-                case ObjectProxy::OBJECT_CAMERA_MODEL:
-                {
-                    // not very interesting
-                    if (0) {
-                        CameraModelProxy *cp = objects->cameraModel(i);
-                        m_objects[cp->uid()] = cp;
+//                        hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                        hub->setProject(project);
 
-                        common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-                        common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub(cp->name(), project, project));
+//                        m_hubs[cp->uid()] = hub;
+//                    }
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_CAMERA_NODE_ATTR:
+//                {
+//                    // not very interesting
+//                    if (0) {
+//                        CameraNodeProxy *cp = objects->cameraNode(i);
+//                        m_objects[cp->uid()] = cp;
 
-                        hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                        hub->setProject(project);
+//                        common::Component *component = common::Application::instance()->components().component("o3s::common::component::camerahub");
+//                        common::CameraHub *hub = static_cast<common::CameraHub*>(component->buildHub(cp->name(), project, project));
 
-                        m_hubs[cp->uid()] = hub;
-                    }
-                }
-                    break;
-                case ObjectProxy::OBJECT_CAMERA_NODE_ATTR:
-                {
-                    // not very interesting
-                    if (0) {
-                        CameraNodeProxy *cp = objects->cameraNode(i);
-                        m_objects[cp->uid()] = cp;
+//                        hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                        hub->setProject(project);
 
-                        common::Component *component = common::Application::instance()->components().component("o3s::common::component::camerahub");
-                        common::CameraHub *hub = static_cast<common::CameraHub*>(component->buildHub(cp->name(), project, project));
+//                        // @todo ortho, fov...
 
-                        hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                        hub->setProject(project);
+//                        m_hubs[cp->uid()] = hub;
+//                    }
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_GEOMETRY:
+//                {
+//                    GeometryProxy *gp = objects->geometry(i);
+//                    m_objects[gp->uid()] = gp;
+//               //     common::MeshHub *hub = new common::MeshHub(gp->name());
 
-                        // @todo ortho, fov...
+//                    // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                    // hub->setProject(project);
 
-                        m_hubs[cp->uid()] = hub;
-                    }
-                }
-                    break;
-                case ObjectProxy::OBJECT_GEOMETRY:
-                {
-                    GeometryProxy *gp = objects->geometry(i);
-                    m_objects[gp->uid()] = gp;
-               //     common::MeshHub *hub = new common::MeshHub(gp->name());
+//                    // @todo explode vertices, uvs...
+//                    // hub->setVertices(gp->vertices());
 
-                    // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    // hub->setProject(project);
+//                    // probably used by a model node
+//                //    m_hubs[gp->uuid()] = hub;
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_LIGHT_NODE_ATTR:
+//                {
+//                    // not very interesting
+//                    if (0) {
+//                        LightNodeProxy *lp = objects->lightNode(i);
+//                        // common::LightHub *hub = new common::LightHub(mp->name());
 
-                    // @todo explode vertices, uvs...
-                    // hub->setVertices(gp->vertices());
+//                        // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                        // hub->setProject(project);
 
-                    // probably used by a model node
-                //    m_hubs[gp->uuid()] = hub;
-                }
-                    break;
-                case ObjectProxy::OBJECT_LIGHT_NODE_ATTR:
-                {
-                    // not very interesting
-                    if (0) {
-                        LightNodeProxy *lp = objects->lightNode(i);
-                        // common::LightHub *hub = new common::LightHub(mp->name());
+//                        // @todo ambient, diffuse, specular, type, size...
 
-                        // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                        // hub->setProject(project);
+//                        // m_hubs[mp->typeName()] = hub;
+//                        delete lp;
+//                    }
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_MATERIAL:
+//                {
+//                    MaterialProxy *mp = objects->material(i);
+//                    m_objects[mp->uid()] = mp;
 
-                        // @todo ambient, diffuse, specular, type, size...
+////                    common::MaterialHub *hub = new common::MaterialHub(mp->name());
 
-                        // m_hubs[mp->typeName()] = hub;
-                        delete lp;
-                    }
-                }
-                    break;
-                case ObjectProxy::OBJECT_MATERIAL:
-                {
-                    MaterialProxy *mp = objects->material(i);
-                    m_objects[mp->uid()] = mp;
+////                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                    // hub->setProject(project);
 
-//                    common::MaterialHub *hub = new common::MaterialHub(mp->name());
+////                    // @todo ambient, diffuse, specular, transparency...
+
+////                    m_hubs[mp->uuid()] = hub;
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_MODEL:
+//                {
+//                    // unspecialized are "Null" and "Root" or unsupported
+//                    ModelProxy *mp = objects->model(i);
+//                    m_objects[mp->uid()] = mp;
+
+//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+//                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Node " + mp->name(), project, project));
 
 //                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    // hub->setProject(project);
+//                    hub->setProject(project);
 
-//                    // @todo ambient, diffuse, specular, transparency...
+//                    hub->setPosition(0, mp->position());
+//                    hub->setRotation(0, mp->rotation());
+//                    hub->setScale(0, mp->scale());
 
-//                    m_hubs[mp->uuid()] = hub;
-                }
-                    break;
-                case ObjectProxy::OBJECT_MODEL:
-                {
-                    // unspecialized are "Null" and "Root" or unsupported
-                    ModelProxy *mp = objects->model(i);
-                    m_objects[mp->uid()] = mp;
+//                    // parent will be know during connections
+//                    m_hubs[mp->uid()] = hub;
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_NODE_ATTRIBUTE:
+//                {
+//                    // unspecialized are unsupported
+//                    NodeAttributeProxy *np = objects->nodeAttribute(i);
+//                    m_objects[np->uid()] = np;
 
-                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Node " + mp->name(), project, project));
+//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+//                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Attr" + np->name(), project, project));
 
-                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    hub->setProject(project);
+//                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                    hub->setProject(project);
 
-                    hub->setPosition(0, mp->position());
-                    hub->setRotation(0, mp->rotation());
-                    hub->setScale(0, mp->scale());
+//                    // parent will be know during connections
+//                    m_hubs[np->uid()] = hub;
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_LIMB_NODE_MODEL:
+//                {
+//                    BoneModelProxy *lp = objects->boneModel(i);
+//                    m_objects[lp->uid()] = lp;
 
-                    // parent will be know during connections
-                    m_hubs[mp->uid()] = hub;
-                }
-                    break;
-                case ObjectProxy::OBJECT_NODE_ATTRIBUTE:
-                {
-                    // unspecialized are unsupported
-                    NodeAttributeProxy *np = objects->nodeAttribute(i);
-                    m_objects[np->uid()] = np;
+//                    // @todo uses a Bone component
+//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+//                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Bone " + lp->name(), project, project));
 
-                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Attr" + np->name(), project, project));
+//                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                    hub->setProject(project);
 
-                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    hub->setProject(project);
+//                    // parent will be know during connections
+//                    m_hubs[lp->uid()] = hub;
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_MESH_MODEL:
+//                {
+//                    MeshModelProxy *mp = objects->meshModel(i);
+//                    m_objects[mp->uid()] = mp;
 
-                    // parent will be know during connections
-                    m_hubs[np->uid()] = hub;
-                }
-                    break;
-                case ObjectProxy::OBJECT_LIMB_NODE_MODEL:
-                {
-                    BoneModelProxy *lp = objects->boneModel(i);
-                    m_objects[lp->uid()] = lp;
+//                    // a spacial node hub
+//                    common::Component *snComponent = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+//                    common::SpacialNodeHub *snHub = static_cast<common::SpacialNodeHub*>(snComponent->buildHub("Node " + mp->name(), project, project));
 
-                    // @todo uses a Bone component
-                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Bone " + lp->name(), project, project));
+//                    snHub->setRef(common::ObjectRef::buildRef(project, snHub->typeRef()));
+//                    snHub->setProject(project);
 
-                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    hub->setProject(project);
+//                    m_hubs[mp->uid()] = snHub;
 
-                    // parent will be know during connections
-                    m_hubs[lp->uid()] = hub;
-                }
-                    break;
-                case ObjectProxy::OBJECT_MESH_MODEL:
-                {
-                    MeshModelProxy *mp = objects->meshModel(i);
-                    m_objects[mp->uid()] = mp;
+//                    // and a mesh hub
+//                    common::Component *mComponent = common::Application::instance()->components().component("o3s::common::component::meshhub");
+//                    common::MeshHub *mHub = static_cast<common::MeshHub*>(mComponent->buildHub(mp->name(), project, snHub));
 
-                    // a spacial node hub
-                    common::Component *snComponent = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-                    common::SpacialNodeHub *snHub = static_cast<common::SpacialNodeHub*>(snComponent->buildHub("Node " + mp->name(), project, project));
+//                    mHub->setRef(common::ObjectRef::buildRef(project, mHub->typeRef()));
+//                    mHub->setProject(project);
 
-                    snHub->setRef(common::ObjectRef::buildRef(project, snHub->typeRef()));
-                    snHub->setProject(project);
+//                    snHub->addHub(mHub);
+//                }
+//                    break;
+//                case ObjectProxy::OBJECT_TEXTURE:
+//                {
+//                    TextureProxy *tp = objects->texture(i);
+//                    m_objects[tp->uid()] = tp;
 
-                    m_hubs[mp->uid()] = snHub;
+//                    // @todo add a TextureResource/hub ?
 
-                    // and a mesh hub
-                    common::Component *mComponent = common::Application::instance()->components().component("o3s::common::component::meshhub");
-                    common::MeshHub *mHub = static_cast<common::MeshHub*>(mComponent->buildHub(mp->name(), project, snHub));
+//                    // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
+//                    // hub->setProject(project);
 
-                    mHub->setRef(common::ObjectRef::buildRef(project, mHub->typeRef()));
-                    mHub->setProject(project);
+//                    // @todo
+//                }
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
 
-                    snHub->addHub(mHub);
-                }
-                    break;
-                case ObjectProxy::OBJECT_TEXTURE:
-                {
-                    TextureProxy *tp = objects->texture(i);
-                    m_objects[tp->uid()] = tp;
+//        delete objects;
+//    }
 
-                    // @todo add a TextureResource/hub ?
+//    // add a root proxy at uid 0
+//    FBXNode *m_rootNode = new FBXNode("Model");
+//    m_rootNode->addProperty(new PropertyInt64(0));
+//    m_rootNode->addProperty(new PropertyString("Root::Root"));
+//    m_rootNode->addProperty(new PropertyString("Root"));
 
-                    // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    // hub->setProject(project);
+//    FBXNode *rootNodeVersion = new FBXNode("Version");
+//    rootNodeVersion->addProperty(new PropertyInt32(232));
+//    m_rootNode->addChild(rootNodeVersion);
 
-                    // @todo
-                }
-                    break;
-                default:
-                    break;
-            }
-        }
+//    ModelProxy *rootProxy = new ModelProxy(m_rootNode);
+//    m_objects[0] = rootProxy;
 
-        delete objects;
-    }
+//    m_def->m_unit = m_unitScale;
 
-    // add a root proxy at uid 0
-    FBXNode *rootNode = new FBXNode("Model");
-    rootNode->addProperty(new PropertyInt64(0));
-    rootNode->addProperty(new PropertyString("Root::Root"));
-    rootNode->addProperty(new PropertyString("Root"));
+//    node = m_parser->child("Connections");
+//    if (node) {
+//        ConnectionsProxy *connections = new ConnectionsProxy(node);
 
-    FBXNode *rootNodeVersion = new FBXNode("Version");
-    rootNodeVersion->addProperty(new PropertyInt32(232));
-    rootNode->addChild(rootNodeVersion);
+//        // setup connections between objects
+//        for (UInt32 i = 0; i < connections->numConnections(); ++i) {
+//            if (connections->connectionType(i) == ConnectionsProxy::CONN_OO) {
+//                Int64 parentUid, childUid;
+//                connections->objectRelation(i, parentUid, childUid);
 
-    ModelProxy *rootProxy = new ModelProxy(rootNode);
-    m_objects[0] = rootProxy;
+//                common::Hub* parentHub = hub(parentUid);
+//                common::Hub* childHub = hub(childUid);
 
-    m_def->m_unit = m_unitScale;
+//                ObjectProxy* parentProxy = objectProxy(parentUid);
+//                ObjectProxy* childProxy = objectProxy(childUid);
 
-    node = m_parser->child("Connections");
-    if (node) {
-        ConnectionsProxy *connections = new ConnectionsProxy(node);
+//                // parent proxy not found
+//                if (parentUid != 0 && !parentProxy) {
+//                    continue;
+//                }
 
-        // setup connections between objects
-        for (UInt32 i = 0; i < connections->numConnections(); ++i) {
-            if (connections->connectionType(i) == ConnectionsProxy::CONN_OO) {
-                Int64 parentUid, childUid;
-                connections->objectRelation(i, parentUid, childUid);
+//                // parent hub not found
+//                if (parentUid != 0 && !parentHub) {
+//                    continue;
+//                }
 
-                common::Hub* parentHub = hub(parentUid);
-                common::Hub* childHub = hub(childUid);
+//                // not imported children ignore the connection
+//                if (!childHub || !childProxy) {
+//                    continue;
+//                }
 
-                ObjectProxy* parentProxy = objectProxy(parentUid);
-                ObjectProxy* childProxy = objectProxy(childUid);
-
-                // parent proxy not found
-                if (parentUid != 0 && !parentProxy) {
-                    continue;
-                }
-
-                // parent hub not found
-                if (parentUid != 0 && !parentHub) {
-                    continue;
-                }
-
-                // not imported children ignore the connection
-                if (!childHub || !childProxy) {
-                    continue;
-                }
-
-                ObjectProxy::ObjectType childType = childProxy->objectType();
-                // @todo subclasses
-                if (childType == ObjectProxy::OBJECT_NODE_ATTRIBUTE) {
-                    // must be assigned to only one parent model
-                    if (childHub->parent() != project) {
-                        O3D_ERROR(E_InvalidPrecondition("Node attribute is already assigned to a parent"));
-                    }
-                }
-
-                ObjectProxy::ObjectType parentType = parentProxy->objectType();
-                if (parentType == ObjectProxy::OBJECT_MESH_MODEL) {
-                    if (childType == ObjectProxy::OBJECT_GEOMETRY) {
-                        // @todo setup geometry resource to mesh
-                    } else if (childType == ObjectProxy::OBJECT_MATERIAL) {
-                        // @todo setup material to mesh
-                    }
-                } else if (parentType == ObjectProxy::OBJECT_SKIN) {
-                    if (childType == ObjectProxy::OBJECT_CLUSTER) {
-                        // @todo add the clustor to the skin
-                        // can be defined only once
-                    }
-                } else if (parentType == ObjectProxy::OBJECT_GEOMETRY) {
-                    if (childType == ObjectProxy::OBJECT_SKIN) {
-
-                    }
-                } else if (parentType == ObjectProxy::OBJECT_CLUSTER) {
-                    if (childType == ObjectProxy::OBJECT_LIMB_NODE_MODEL ||
-                        childType == ObjectProxy::OBJECT_MESH_MODEL ||
-                        childType == ObjectProxy::OBJECT_NULL_NODE) {
-                        // cluster->link(childHub);
-                    }
-                } else if (parentType == ObjectProxy::OBJECT_ANIMATION_LAYER) {
-                    if (childType == ObjectProxy::OBJECT_ANIMATION_CURVE_NODE) {
-                        // @todo
-                    }
-                } else if (parentType == ObjectProxy::OBJECT_ANIMATION_CURVE_NODE) {
-                    if (childType == ObjectProxy::OBJECT_ANIMATION_CURVE) {
-                        // @todo
-                    }
-                }
-
-                // parent uid 0 means root (project or given root hub)
-                if (parentUid == 0) {
-                    if (topLevelHub) {
-                        // reparent
-                        childHub->setParent(topLevelHub);
-                        topLevelHub->addHub(childHub);
-                    } else {
-                        // reparent
-                        childHub->setParent(project);
-                        project->addHub(childHub);
-                    }
-                } else {
-                    // reparent
-                    childHub->setParent(parentHub);
-                    parentHub->addHub(childHub);
-                }
-            } else if (connections->connectionType(i) == ConnectionsProxy::CONN_OP) {
-                Int64 parentUid, childUid;
-                String propertyName = connections->propertyRelation(i, parentUid, childUid);
-
-                common::Hub* parentHub = hub(parentUid);
-                common::Hub* childHub = hub(childUid);
-
-                ObjectProxy* parentProxy = objectProxy(parentUid);
-                ObjectProxy* childProxy = objectProxy(childUid);
-
-                // parent proxy not found
-                if (parentUid != 0 && !parentProxy) {
-                    continue;
-                }
-
-                // parent hub not found
-                if (parentUid != 0 && !parentHub) {
-                    continue;
-                }
-
-                // not imported children ignore the connection
-                if (!childHub || !childProxy) {
-                    continue;
-                }
-
-                ObjectProxy::ObjectType childType = childProxy->objectType();
-                if (childType == ObjectProxy::OBJECT_ANIMATION_CURVE_NODE) {
-                    // @todo the parent is a reference on the bone
-                    // and the property is linked to this reference
-                }
-
-                ObjectProxy::ObjectType parentType = parentProxy->objectType();
-                if (parentType == ObjectProxy::OBJECT_MATERIAL) {
-//                    common::MaterialHub *materialHub = static_cast<MaterialHub*>(parentHub);
-//                    if (childType == ObjectProxy::OBJECT_TEXTURE) {
-//                        if (propertyName == "NormalMap") {
-//                            // @todo set texture
-//                        } else if (propertyName == "DiffuseColor") {
-//                            // @todo set texture
-//                        }
+//                ObjectProxy::ObjectType childType = childProxy->objectType();
+//                // @todo subclasses
+//                if (childType == ObjectProxy::OBJECT_NODE_ATTRIBUTE) {
+//                    // must be assigned to only one parent model
+//                    if (childHub->parent() != project) {
+//                        O3D_ERROR(E_InvalidPrecondition("Node attribute is already assigned to a parent"));
 //                    }
-                }
-            }
-        }
+//                }
 
-        delete connections;
-    }
+//                ObjectProxy::ObjectType parentType = parentProxy->objectType();
+//                if (parentType == ObjectProxy::OBJECT_MESH_MODEL) {
+//                    if (childType == ObjectProxy::OBJECT_GEOMETRY) {
+//                        // @todo setup geometry resource to mesh
+//                    } else if (childType == ObjectProxy::OBJECT_MATERIAL) {
+//                        // @todo setup material to mesh
+//                    }
+//                } else if (parentType == ObjectProxy::OBJECT_SKIN) {
+//                    if (childType == ObjectProxy::OBJECT_CLUSTER) {
+//                        // @todo add the clustor to the skin
+//                        // can be defined only once
+//                    }
+//                } else if (parentType == ObjectProxy::OBJECT_GEOMETRY) {
+//                    if (childType == ObjectProxy::OBJECT_SKIN) {
 
-    // @todo Post process each OBJECT_CLUSTER
+//                    }
+//                } else if (parentType == ObjectProxy::OBJECT_CLUSTER) {
+//                    if (childType == ObjectProxy::OBJECT_LIMB_NODE_MODEL ||
+//                        childType == ObjectProxy::OBJECT_MESH_MODEL ||
+//                        childType == ObjectProxy::OBJECT_NULL_NODE) {
+//                        // cluster->link(childHub);
+//                    }
+//                } else if (parentType == ObjectProxy::OBJECT_ANIMATION_LAYER) {
+//                    if (childType == ObjectProxy::OBJECT_ANIMATION_CURVE_NODE) {
+//                        // @todo
+//                    }
+//                } else if (parentType == ObjectProxy::OBJECT_ANIMATION_CURVE_NODE) {
+//                    if (childType == ObjectProxy::OBJECT_ANIMATION_CURVE) {
+//                        // @todo
+//                    }
+//                }
 
-    // setup resources to editor
-    // @todo geometry, material, texture
+//                // parent uid 0 means root (project or given root hub)
+//                if (parentUid == 0) {
+//                    if (topLevelHub) {
+//                        // reparent
+//                        childHub->setParent(topLevelHub);
+//                        topLevelHub->addHub(childHub);
+//                    } else {
+//                        // reparent
+//                        childHub->setParent(project);
+//                        project->addHub(childHub);
+//                    }
+//                } else {
+//                    // reparent
+//                    childHub->setParent(parentHub);
+//                    parentHub->addHub(childHub);
+//                }
+//            } else if (connections->connectionType(i) == ConnectionsProxy::CONN_OP) {
+//                Int64 parentUid, childUid;
+//                String propertyName = connections->propertyRelation(i, parentUid, childUid);
 
-    // setup model node to editor
-    // @todo remove hub instances above
-    ModelProxy *currentProxy = rootProxy;
-    std::list<std::list<ModelProxy*>::iterator> cursor;
+//                common::Hub* parentHub = hub(parentUid);
+//                common::Hub* childHub = hub(childUid);
 
-    while (currentProxy != nullptr) {
-        // @todo type... creation...
-        currentProxy = currentProxy->recursiveNext(cursor);
-    }
+//                ObjectProxy* parentProxy = objectProxy(parentUid);
+//                ObjectProxy* childProxy = objectProxy(childUid);
 
-    // delete object proxies including the root proxy
-    for (auto it = m_objects.begin(); it != m_objects.end(); ++it) {
-        delete it->second;
-    }
+//                // parent proxy not found
+//                if (parentUid != 0 && !parentProxy) {
+//                    continue;
+//                }
 
-    // and the fake root node (manually created)
-    delete rootNode;
+//                // parent hub not found
+//                if (parentUid != 0 && !parentHub) {
+//                    continue;
+//                }
 
-    m_objects.clear();
-}
+//                // not imported children ignore the connection
+//                if (!childHub || !childProxy) {
+//                    continue;
+//                }
+
+//                ObjectProxy::ObjectType childType = childProxy->objectType();
+//                if (childType == ObjectProxy::OBJECT_ANIMATION_CURVE_NODE) {
+//                    // @todo the parent is a reference on the bone
+//                    // and the property is linked to this reference
+//                }
+
+//                ObjectProxy::ObjectType parentType = parentProxy->objectType();
+//                if (parentType == ObjectProxy::OBJECT_MATERIAL) {
+////                    common::MaterialHub *materialHub = static_cast<MaterialHub*>(parentHub);
+////                    if (childType == ObjectProxy::OBJECT_TEXTURE) {
+////                        if (propertyName == "NormalMap") {
+////                            // @todo set texture
+////                        } else if (propertyName == "DiffuseColor") {
+////                            // @todo set texture
+////                        }
+////                    }
+//                }
+//            }
+//        }
+
+//        delete connections;
+//    }
+
+//    // @todo Post process each OBJECT_CLUSTER
+
+//    // setup resources to editor
+//    // @todo geometry, material, texture
+
+//    // setup model node to editor
+//    // @todo remove hub instances above
+//    ModelProxy *currentProxy = rootProxy;
+//    std::list<std::list<ModelProxy*>::iterator> cursor;
+
+//    while (currentProxy != nullptr) {
+//        // @todo type... creation...
+//        currentProxy = currentProxy->recursiveNext(cursor);
+//    }
+
+//    // delete object proxies including the root proxy
+//    for (auto it = m_objects.begin(); it != m_objects.end(); ++it) {
+//        delete it->second;
+//    }
+
+//    // and the fake root node (manually created)
+//    delete m_rootNode;
+
+//    m_objects.clear();
+//}

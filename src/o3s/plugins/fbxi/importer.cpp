@@ -69,6 +69,11 @@ o3d::studio::common::ImportDefinition *Importer::import(
         O3SAdapter *adapter = new O3SAdapter(parser, options, parent, def);
         result = adapter->processImport();
 
+        if (result) {
+            // and convert to the editor
+            result = adapter->toScene();
+        }
+
         delete adapter;
     }
 

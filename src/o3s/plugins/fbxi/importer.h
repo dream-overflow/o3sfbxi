@@ -25,7 +25,7 @@ namespace fbxi {
  */
 class O3S_PLUGIN_API FbxImportDefinition : public common::ImportDefinition
 {
-    friend class O3SAdapter;
+    friend class Loader;
 
 public:
 

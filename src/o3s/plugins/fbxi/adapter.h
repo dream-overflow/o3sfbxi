@@ -27,10 +27,10 @@ public:
     virtual Bool processImport() = 0;
 
     /**
-     * @brief Do here your import processing using the structure of FBXNode.
+     * @brief Do here your conversion from importer to editor hubs and resources.
      * @return True if success.
      */
-    virtual Bool processImportLazy() = 0;
+    virtual Bool toScene() = 0;
 };
 
 } // namespace fbxi

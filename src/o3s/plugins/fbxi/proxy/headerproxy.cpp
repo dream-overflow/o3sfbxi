@@ -50,6 +50,16 @@ const FBXNode *Proxy::node() const
     return m_node;
 }
 
+void Proxy::setParent(Proxy *proxy)
+{
+    m_parent = proxy;
+}
+
+void Proxy::addChild(Proxy *proxy)
+{
+    m_children.push_back(proxy);
+}
+
 HeaderProxy::HeaderProxy(FBXNode *node) :
     Proxy(node)
 {

@@ -11,6 +11,7 @@
 
 #include "adapter.h"
 #include "parser.h"
+#include "loader.h"
 
 #include "importer.h"
 
@@ -39,24 +40,21 @@ public:
     virtual ~O3SAdapter();
 
     virtual Bool processImport() override;
-    virtual Bool processImportLazy() override;
+    virtual Bool toScene() override;
 
     common::Hub* hub(Int64 uid);
-    ObjectProxy* objectProxy(Int64 uid);
 
 private:
 
     Parser *m_parser;
+    Loader *m_loader;
 
     common::ImporterOption *m_options;
     common::Entity *m_parent;
 
     std::map<Int64, common::Hub*> m_hubs;
-    std::map<Int64, ObjectProxy*> m_objects;
 
     FbxImportDefinition *m_def;
-
-    void setupDef(common::Hub *topLevelHub);
 
     Vector3 m_upAxis;
     Vector3 m_frontAxis;

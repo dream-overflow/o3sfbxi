@@ -10,6 +10,7 @@
 #define _O3DS_FBXI_PROXY_H
 
 #include "../fbxnode.h"
+#include <list>
 
 namespace o3d {
 namespace studio {
@@ -27,10 +28,16 @@ public:
     FBXNode *node();
     const FBXNode *node() const;
 
+    void setParent(Proxy *proxy);
+    void addChild(Proxy *proxy);
+
 protected:
 
     FBXNode *m_node;
     Int32 m_version;
+
+    Proxy *m_parent;
+    std::list<Proxy*> m_children;
 };
 
 } // namespace fbxi

@@ -1,3 +1,5 @@
+src/o3s/plugins/fbxi/loader.cpp
+src/o3s/plugins/fbxi/loader.h
 src/o3s/plugins/fbxi/proxy/animcurvenodeproxy.cpp
 src/o3s/plugins/fbxi/proxy/animcurvenodeproxy.h
 src/o3s/plugins/fbxi/proxy/animcurveproxy.cpp
