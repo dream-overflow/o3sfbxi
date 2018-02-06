@@ -17,7 +17,8 @@ using namespace o3d::studio::fbxi;
 
 ObjectProxy::ObjectProxy(FBXNode *node) :
     Proxy(node),
-    m_objectType(OBJECT_UNDEFINED)
+    m_objectType(OBJECT_UNDEFINED),
+    m_parent(nullptr)
 {
 }
 
@@ -62,4 +63,42 @@ o3d::String ObjectProxy::subClass()
     }
 
     return String();
+}
+
+void ObjectProxy::setParent(ObjectProxy *parent)
+{
+    m_parent = parent;
+}
+
+void ObjectProxy::addChild(ObjectProxy *proxy)
+{
+    m_children.push_back(proxy);
+}
+
+ObjectProxy* ObjectProxy::recursiveNext(std::list<size_t> &cursor)
+{
+    ObjectProxy *result = nullptr;
+    ObjectProxy *node = this;
+
+    while (cursor.back() >= node->m_children.size()) {
+        cursor.pop_back();
+
+        node = node->m_parent;
+
+        if (cursor.empty() || node == nullptr) {
+            break;
+        }
+    }
+
+    if (!cursor.empty() && cursor.back() < node->m_children.size()) {
+        result = node->m_children[cursor.back()];
+
+        // next potential child at this level
+        ++cursor.back();
+
+        // and enter to one more depth
+        cursor.push_back(0);
+    }
+
+    return result;
 }

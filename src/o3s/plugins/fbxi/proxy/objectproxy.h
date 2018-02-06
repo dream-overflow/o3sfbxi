@@ -59,9 +59,17 @@ public:
     String className();
     String subClass();
 
+    void setParent(ObjectProxy *parent);
+    void addChild(ObjectProxy *proxy);
+
+    ObjectProxy* recursiveNext(std::list<size_t> &cursor);
+
 protected:
 
     ObjectType m_objectType;
+
+    ObjectProxy *m_parent;
+    std::vector<ObjectProxy*> m_children;
 };
 
 } // namespace fbxi

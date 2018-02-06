@@ -17,8 +17,7 @@
 using namespace o3d::studio::fbxi;
 
 ModelProxy::ModelProxy(FBXNode *node) :
-    ObjectProxy(node),
-    m_parent(nullptr)
+    ObjectProxy(node)
 {
     if (!m_node || m_node->name() != "Model") {
         O3D_ERROR(E_InvalidParameter("Must be a Model node"));
@@ -71,27 +70,6 @@ o3d::Vector3 ModelProxy::scale()
 //    }
 
     return scale;
-}
-
-ModelProxy *ModelProxy::recursiveNext(std::list<std::list<ModelProxy*>::iterator> &cursor)
-{
-    return nullptr;
-    /*// return to parent once terminated with any children
-    if (cursor.back() == m_children.end()) {
-        cursor.pop_back();
-        ++cursor.back();
-
-        return m_parent->recursiveNext(cursor);
-    }
-
-    ModelProxy *mp = cursor.back();
-    // cursor.push_back();
-
-    return mp->recursiveNext(cursor);
-
-    ++cursor.back();
-
-    return mp;*/
 }
 
 RootProxy::RootProxy(FBXNode *node) :

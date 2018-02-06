@@ -123,13 +123,16 @@ o3d::Bool O3SAdapter::toScene()
     // @todo from loader
     // setup model node to editor
     // @todo remove hub instances above
-//    ModelProxy *currentProxy = rootProxy;
-//    std::list<std::list<ModelProxy*>::iterator> cursor;
+    ObjectProxy *currentProxy = m_loader->objectProxy(0);
+    std::list<size_t> cursor;
+    cursor.push_back(0);
 
-//    while (currentProxy != nullptr) {
-//        // @todo type... creation...
-//        currentProxy = currentProxy->recursiveNext(cursor);
-//    }
+    while (currentProxy != nullptr) {
+        System::print(currentProxy->name(), currentProxy->subClass() + String(" uid={0}").arg(currentProxy->uid()));
+
+        // @todo type... creation...
+        currentProxy = currentProxy->recursiveNext(cursor);
+    }
 
     return True;
 }

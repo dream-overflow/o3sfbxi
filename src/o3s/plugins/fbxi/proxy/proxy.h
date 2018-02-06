@@ -28,16 +28,10 @@ public:
     FBXNode *node();
     const FBXNode *node() const;
 
-    void setParent(Proxy *proxy);
-    void addChild(Proxy *proxy);
-
 protected:
 
     FBXNode *m_node;
     Int32 m_version;
-
-    Proxy *m_parent;
-    std::list<Proxy*> m_children;
 };
 
 } // namespace fbxi

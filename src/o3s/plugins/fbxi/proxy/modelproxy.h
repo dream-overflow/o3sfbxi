@@ -32,13 +32,6 @@ public:
     Vector3 position();
     Vector3 rotation();
     Vector3 scale();
-
-    ModelProxy* recursiveNext(std::list<std::list<ModelProxy*>::iterator> &cursor);
-
-protected:
-
-    ModelProxy *m_parent;
-    std::vector<ModelProxy*> m_children;
 };
 
 class RootProxy : public ModelProxy
