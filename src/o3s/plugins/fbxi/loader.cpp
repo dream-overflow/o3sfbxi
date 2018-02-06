@@ -113,71 +113,30 @@ void Loader::load()
             switch (objects->objectType(i)) {
                 case ObjectProxy::OBJECT_CAMERA_MODEL:
                 {
-                    // not very interesting
-                    if (0) {
-                        CameraModelProxy *cp = objects->cameraModel(i);
-                        m_objects[cp->uid()] = cp;
-
-//                        common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-//                        common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub(cp->name(), project, project));
-
-//                        hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-//                        hub->setProject(project);
-
-//                        m_hubs[cp->uid()] = hub;
-                    }
+                    CameraModelProxy *cp = objects->cameraModel(i);
+                    m_objects[cp->uid()] = cp;
                 }
                     break;
                 case ObjectProxy::OBJECT_CAMERA_NODE_ATTR:
                 {
-                    // not very interesting
-                    if (0) {
-                        CameraNodeProxy *cp = objects->cameraNode(i);
-                        m_objects[cp->uid()] = cp;
-
-//                        common::Component *component = common::Application::instance()->components().component("o3s::common::component::camerahub");
-//                        common::CameraHub *hub = static_cast<common::CameraHub*>(component->buildHub(cp->name(), project, project));
-
-//                        hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-//                        hub->setProject(project);
-
-//                        // @todo ortho, fov...
-
-//                        m_hubs[cp->uid()] = hub;
-                    }
+                    CameraNodeProxy *cp = objects->cameraNode(i);
+                    m_objects[cp->uid()] = cp;
                 }
                     break;
                 case ObjectProxy::OBJECT_GEOMETRY:
                 {
                     GeometryProxy *gp = objects->geometry(i);
                     m_objects[gp->uid()] = gp;
-               //     common::MeshHub *hub = new common::MeshHub(gp->name());
 
-                    // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    // hub->setProject(project);
-
-                    // @todo explode vertices, uvs...
-                    // hub->setVertices(gp->vertices());
-
-                    // probably used by a model node
-                //    m_hubs[gp->uuid()] = hub;
+                    gp->processGeometry();
                 }
                     break;
                 case ObjectProxy::OBJECT_LIGHT_NODE_ATTR:
                 {
-                    // not very interesting
-                    if (0) {
-                        LightNodeProxy *lp = objects->lightNode(i);
-                        // common::LightHub *hub = new common::LightHub(mp->name());
+                    LightNodeProxy *lp = objects->lightNode(i);
+                    m_objects[lp->uid()] = lp;
 
-                        // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                        // hub->setProject(project);
-
-                        // @todo ambient, diffuse, specular, type, size...
-
-                        // m_hubs[mp->typeName()] = hub;
-                        delete lp;
-                    }
+                    // @todo params
                 }
                     break;
                 case ObjectProxy::OBJECT_MATERIAL:
@@ -185,14 +144,7 @@ void Loader::load()
                     MaterialProxy *mp = objects->material(i);
                     m_objects[mp->uid()] = mp;
 
-//                    common::MaterialHub *hub = new common::MaterialHub(mp->name());
-
-//                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    // hub->setProject(project);
-
-//                    // @todo ambient, diffuse, specular, transparency...
-
-//                    m_hubs[mp->uuid()] = hub;
+                    // @todo color
                 }
                     break;
                 case ObjectProxy::OBJECT_MODEL:
@@ -200,19 +152,6 @@ void Loader::load()
                     // unspecialized are "Null" and "Root" or unsupported
                     ModelProxy *mp = objects->model(i);
                     m_objects[mp->uid()] = mp;
-
-//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-//                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Node " + mp->name(), project, project));
-
-//                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-//                    hub->setProject(project);
-
-//                    hub->setPosition(0, mp->position());
-//                    hub->setRotation(0, mp->rotation());
-//                    hub->setScale(0, mp->scale());
-
-//                    // parent will be know during connections
-//                    m_hubs[mp->uid()] = hub;
                 }
                     break;
                 case ObjectProxy::OBJECT_NODE_ATTRIBUTE:
@@ -220,68 +159,24 @@ void Loader::load()
                     // unspecialized are unsupported
                     NodeAttributeProxy *np = objects->nodeAttribute(i);
                     m_objects[np->uid()] = np;
-
-//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-//                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Attr" + np->name(), project, project));
-
-//                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-//                    hub->setProject(project);
-
-//                    // parent will be know during connections
-//                    m_hubs[np->uid()] = hub;
                 }
                     break;
                 case ObjectProxy::OBJECT_LIMB_NODE_MODEL:
                 {
                     BoneModelProxy *lp = objects->boneModel(i);
                     m_objects[lp->uid()] = lp;
-
-//                    // @todo uses a Bone component
-//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-//                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Bone " + lp->name(), project, project));
-
-//                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-//                    hub->setProject(project);
-
-//                    // parent will be know during connections
-//                    m_hubs[lp->uid()] = hub;
                 }
                     break;
                 case ObjectProxy::OBJECT_MESH_MODEL:
                 {
                     MeshModelProxy *mp = objects->meshModel(i);
                     m_objects[mp->uid()] = mp;
-
-//                    // a spacial node hub
-//                    common::Component *snComponent = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-//                    common::SpacialNodeHub *snHub = static_cast<common::SpacialNodeHub*>(snComponent->buildHub("Node " + mp->name(), project, project));
-
-//                    snHub->setRef(common::ObjectRef::buildRef(project, snHub->typeRef()));
-//                    snHub->setProject(project);
-
-//                    m_hubs[mp->uid()] = snHub;
-
-//                    // and a mesh hub
-//                    common::Component *mComponent = common::Application::instance()->components().component("o3s::common::component::meshhub");
-//                    common::MeshHub *mHub = static_cast<common::MeshHub*>(mComponent->buildHub(mp->name(), project, snHub));
-
-//                    mHub->setRef(common::ObjectRef::buildRef(project, mHub->typeRef()));
-//                    mHub->setProject(project);
-
-//                    snHub->addHub(mHub);
                 }
                     break;
                 case ObjectProxy::OBJECT_TEXTURE:
                 {
                     TextureProxy *tp = objects->texture(i);
                     m_objects[tp->uid()] = tp;
-
-                    // @todo add a TextureResource/hub ?
-
-                    // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-                    // hub->setProject(project);
-
-                    // @todo
                 }
                     break;
                 default:

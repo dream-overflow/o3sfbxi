@@ -30,6 +30,13 @@ public:
         DATA_BITANGENTS = 5
     };
 
+    enum MapType
+    {
+        BY_POLYGON_VERTEX,
+        BY_POLYGON,
+        BY_VERTEX
+    };
+
     /**
      * @brief GeometryProxy
      * @param node Node named Camera
@@ -43,19 +50,51 @@ public:
      */
     Bool processGeometry();
 
+    /**
+     * @brief Access to a specific vertex data array once geometry has been processed.
+     * @param Vertex array type.
+     * @return Can be an empty array if not defined.
+     */
     SmartArrayFloat vertexData(VertexData v);
+
+    /**
+     * @brief Global indices array.
+     */
     SmartArrayInt32 indices();
 
+    /**
+     * @brief Per vertex material id.
+     */
+    SmartArrayInt32 materials();
+
+    /**
+     * @brief As parsed edges (not processed).
+     */
     SmartArrayInt32 edges();
 
-private:
+    /**
+     * @brief Number of materials if, corresponding to number of relative indices arrays.
+     */
+    UInt32 numMaterials() const;
 
-    enum MapType
+    /**
+     * @brief Indices relative array per material id.
+     * @param id Material id.
+     */
+    SmartArrayInt32 indices(UInt32 id);
+
+    struct Vertex
     {
-        BY_POLYGON_VERTEX,
-        BY_POLYGON,
-        BY_VERTEX
+        ~Vertex()
+        {
+            o3d::deletePtr(next);
+        }
+
+        Int32 index = -1;
+        Vertex* next = nullptr;
     };
+
+private:
 
     Bool readVertexData(FBXNode *node,
             const String& name,
@@ -64,11 +103,17 @@ private:
             SmartArrayInt32 &indices,
             MapType &mapType);
 
+    void mergeVertexData();
+    void mergeMaterials();
+
     SmartArrayFloat m_vertexData[DATA_BITANGENTS+1];
+    SmartArrayInt32 m_materials;
     SmartArrayInt32 m_indices;
 
-    ArrayUInt32 m_toOldVertices;
-    ArrayUInt32 m_toNewVertices;
+    ArrayInt32 m_toOldVertices;
+
+    TemplateArray<Vertex> m_toNewVertices;
+    std::vector<SmartArrayInt32> m_perMaterialIndices;
 };
 
 } // namespace fbxi
