@@ -27,6 +27,8 @@ class BoneModelProxy;
 class MeshModelProxy;
 class CameraModelProxy;
 class LightModelProxy;
+class RootModelProxy;
+class NullModelProxy;
 
 class ObjectsProxy : public Proxy
 {
@@ -59,6 +61,9 @@ public:
     MeshModelProxy* meshModel(UInt32 i);
     CameraModelProxy* cameraModel(UInt32 i);
     LightModelProxy* lightModel(UInt32 i);
+
+    RootModelProxy* rootProxy(UInt32 i);
+    NullModelProxy* nullProxy(UInt32 i);
 
 private:
 

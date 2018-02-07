@@ -30,6 +30,18 @@ public:
      * @param node Node subclassed Mesh
      */
     MeshNodeProxy(FBXNode *node);
+};
+
+class MeshModelProxy : public ModelProxy
+{
+public:
+
+    /**
+     * @brief MeshModelProxy
+     * @param node Node subclassed Mesh
+     */
+    MeshModelProxy(FBXNode *node);
+
 
     void setGeometry(GeometryProxy *geometry);
     GeometryProxy* geometry();
@@ -43,17 +55,6 @@ protected:
 
     GeometryProxy *m_geometry;
     std::vector<MaterialProxy*> m_materials;
-};
-
-class MeshModelProxy : public ModelProxy
-{
-public:
-
-    /**
-     * @brief MeshModelProxy
-     * @param node Node subclassed Mesh
-     */
-    MeshModelProxy(FBXNode *node);
 };
 
 } // namespace fbxi

@@ -78,8 +78,14 @@ o3d::Vector3 ModelProxy::scale()
     return scale;
 }
 
-RootProxy::RootProxy(FBXNode *node) :
+RootModelProxy::RootModelProxy(FBXNode *node) :
     ModelProxy(node ? node : new FBXNode("Root"))
 {
     m_objectType = OBJECT_ROOT_NODE;
+}
+
+NullModelProxy::NullModelProxy(FBXNode *node) :
+    ModelProxy(node)
+{
+    m_objectType = OBJECT_NULL_NODE;
 }

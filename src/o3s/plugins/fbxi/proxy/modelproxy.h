@@ -34,15 +34,26 @@ public:
     Vector3 scale();
 };
 
-class RootProxy : public ModelProxy
+class NullModelProxy : public ModelProxy
 {
 public:
 
     /**
-     * @brief RootProxy
+     * @brief NullModelProxy
+     * @param node Node named Model subclass Null.
+     */
+    NullModelProxy(FBXNode *node);
+};
+
+class RootModelProxy : public ModelProxy
+{
+public:
+
+    /**
+     * @brief RootModelProxy
      * @param node Node named Model subclass Root.
      */
-    RootProxy(FBXNode *node);
+    RootModelProxy(FBXNode *node);
 };
 
 } // namespace fbxi

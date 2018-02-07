@@ -19,6 +19,7 @@
 // #include "proxy/takeproxy.h"
 
 #include "proxy/modelproxy.h"
+#include "proxy/clusterproxy.h"
 #include "proxy/materialproxy.h"
 #include "proxy/textureproxy.h"
 #include "proxy/cameraproxy.h"
@@ -226,7 +227,9 @@ void Loader::load()
                     continue;
                 }
 
+                ObjectProxy::ObjectType parentType = parentProxy->objectType();
                 ObjectProxy::ObjectType childType = childProxy->objectType();
+
                 // @todo subclasses
                 if (childType == ObjectProxy::OBJECT_NODE_ATTRIBUTE) {
                     // must be assigned to only one parent model
@@ -235,13 +238,25 @@ void Loader::load()
                     } else {
                         parentProxy->setNodeAttribute(static_cast<NodeAttributeProxy*>(childProxy));
                     }
+                } else if (childType == ObjectProxy::OBJECT_MODEL ||
+                           childType == ObjectProxy::OBJECT_MESH_MODEL ||
+                           childType == ObjectProxy::OBJECT_CAMERA_MODEL ||
+                           childType == ObjectProxy::OBJECT_LIGHT_MODEL) {
+                    // parent the child to root or another parent node
+                    childProxy->setParent(parentProxy);
+                    parentProxy->addChild(childProxy);
+                } else if (childType == ObjectProxy::OBJECT_LIMB_NODE_MODEL) {
+                    if (parentType == ObjectProxy::OBJECT_LIMB_NODE_MODEL) {
+                        // parent the child if the parent is itself a limb node
+                        childProxy->setParent(parentProxy);
+                        parentProxy->addChild(childProxy);
+                    }
                 }
 
-                ObjectProxy::ObjectType parentType = parentProxy->objectType();
                 if (parentType == ObjectProxy::OBJECT_MESH_MODEL) {
                     if (childType == ObjectProxy::OBJECT_GEOMETRY) {
                         GeometryProxy* geometryProxy = static_cast<GeometryProxy*>(parentProxy);
-                        MeshNodeProxy* meshProxy = static_cast<MeshNodeProxy*>(parentProxy);
+                        MeshModelProxy* meshProxy = static_cast<MeshModelProxy*>(parentProxy);
 
                         if (meshProxy->geometry() != nullptr) {
                             O3D_ERROR(E_InvalidPrecondition("Geometry is already assigned to this mesh"));
@@ -250,24 +265,42 @@ void Loader::load()
                         }
                     } else if (childType == ObjectProxy::OBJECT_MATERIAL) {
                         MaterialProxy* materialProxy = static_cast<MaterialProxy*>(materialProxy);
-                        MeshNodeProxy* meshProxy = static_cast<MeshNodeProxy*>(parentProxy);
+                        MeshModelProxy* meshProxy = static_cast<MeshModelProxy*>(parentProxy);
 
                         meshProxy->addMaterial(materialProxy);
                     }
                 } else if (parentType == ObjectProxy::OBJECT_SKIN) {
                     if (childType == ObjectProxy::OBJECT_CLUSTER) {
-                        // @todo add the clustor to the skin
-                        // can be defined only once
+                    // @todo SkinProxy
+//                        SkinProxy* skinProxy = static_cast<SkinProxy*>(parentProxy);
+//                        ClusterProxy* clusterProxy = static_cast<ClusterProxy*>(childProxy);
+
+//                        skinProxy.addCluster(clusterProxy);
+
+//                        if (clusterProxy->skin()) {
+//                            O3D_ERROR(E_InvalidPrecondition("Cluster is already assigned to a skin"));
+//                        } else {
+//                            clusterProxy->setSkin(skinProxy);
+//                        }
                     }
                 } else if (parentType == ObjectProxy::OBJECT_GEOMETRY) {
                     if (childType == ObjectProxy::OBJECT_SKIN) {
+//                        GeometryProxy* geometryProxy = static_cast<GeometryProxy*>(parentProxy);
+//                        SkinProxy* skinProxy = static_cast<SkinProxy*>(childType);
 
+//                        geometryProxy->setSkin(skinProxy);
                     }
                 } else if (parentType == ObjectProxy::OBJECT_CLUSTER) {
                     if (childType == ObjectProxy::OBJECT_LIMB_NODE_MODEL ||
                         childType == ObjectProxy::OBJECT_MESH_MODEL ||
                         childType == ObjectProxy::OBJECT_NULL_NODE) {
-                        // cluster->link(childHub);
+
+                        ClusterProxy* clusterProxy = static_cast<ClusterProxy*>(parentProxy);
+                        if (clusterProxy->link()) {
+                            O3D_ERROR(E_InvalidPrecondition("Link is already assigned to this cluster"));
+                        } else {
+                            clusterProxy->setLink(childProxy);
+                        }
                     }
                 } else if (parentType == ObjectProxy::OBJECT_ANIMATION_LAYER) {
                     if (childType == ObjectProxy::OBJECT_ANIMATION_CURVE_NODE) {
@@ -278,10 +311,6 @@ void Loader::load()
                         // @todo
                     }
                 }
-
-                // parent the child
-                childProxy->setParent(parentProxy);
-                parentProxy->addChild(childProxy);
             } else if (connections->connectionType(i) == ConnectionsProxy::CONN_OP) {
                 Int64 parentUid, childUid;
                 String propertyName = connections->propertyRelation(i, parentUid, childUid);

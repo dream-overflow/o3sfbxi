@@ -127,12 +127,102 @@ o3d::Bool O3SAdapter::toScene()
     std::list<size_t> cursor;
     cursor.push_back(0);
 
+    common::Component *spacialNodeComponent = common::Application::instance()->components().component("o3s::common::component::spacialhub");
+    common::Component *cameraComponent = common::Application::instance()->components().component("o3s::common::component::camerahub");
+    // common::Component *lightComponent = common::Application::instance()->components().component("o3s::common::component::lighthub");
+    common::Component *meshComponent = common::Application::instance()->components().component("o3s::common::component::meshhub");
+
+    common::Project* project = m_parent->project();
+    common::Hub* rootHub = nullptr;
+
+    common::Hub *parentHub;
+    common::Entity *parentEntity;
+
+    if (m_parent->ref().light().baseTypeOf(common::TypeRef::hub())) {
+        rootHub = static_cast<common::Hub*>(m_parent);
+    }
+
+    // temporary map to retrieve parent hub
+    std::map<ObjectProxy*, common::Hub*> m_proxyToHub;
+    m_proxyToHub[currentProxy] = rootHub;
+
+    // parent hub @todo
     while (currentProxy != nullptr) {
         System::print(currentProxy->name(), currentProxy->subClass() + String(" uid={0}").arg(currentProxy->uid()));
 
-        // @todo type... creation...
+        // retrieve the parent hub
+        if (currentProxy->parent()) {
+            parentHub = m_proxyToHub[currentProxy->parent()];
+            parentEntity = parentHub;
+        } else {
+            parentHub = nullptr;
+            parentEntity = project;
+        }
+
+        if (currentProxy->objectType() == ObjectProxy::OBJECT_NULL_NODE) {
+            // @todo is it processed ? what for hier of model ?
+        } else if (currentProxy->objectType() == ObjectProxy::OBJECT_MESH_MODEL) {
+            MeshModelProxy *proxy = static_cast<MeshModelProxy*>(currentProxy);
+            common::SpacialNodeHub *spacialHub = static_cast<common::SpacialNodeHub*>(spacialNodeComponent->buildHub(
+                "Node " + proxy->name(), project, parentEntity));
+
+            spacialHub->setRef(common::ObjectRef::buildRef(project, spacialHub->typeRef()));
+
+            // @todo transform
+
+            if (parentHub) {
+                parentHub->addHub(spacialHub);
+            } else {
+                project->addHub(spacialHub);
+            }
+
+            // store for lookup
+            m_proxyToHub[proxy] = spacialHub;
+
+            common::MeshHub *meshHub = static_cast<common::MeshHub*>(meshComponent->buildHub(
+                proxy->name(), project, spacialHub));
+
+            meshHub->setRef(common::ObjectRef::buildRef(project, meshHub->typeRef()));
+
+            // @todo geometry
+
+            spacialHub->addHub(meshHub);
+        } else if (currentProxy->objectType() == ObjectProxy::OBJECT_CAMERA_MODEL) {
+            CameraModelProxy *proxy = static_cast<CameraModelProxy*>(currentProxy);
+            common::SpacialNodeHub *spacialHub = static_cast<common::SpacialNodeHub*>(spacialNodeComponent->buildHub(
+                "Node " + proxy->name(), project, parentEntity));
+
+            spacialHub->setRef(common::ObjectRef::buildRef(project, spacialHub->typeRef()));
+
+            // @todo transform
+
+            if (parentHub) {
+                parentHub->addHub(spacialHub);
+            } else {
+                project->addHub(spacialHub);
+            }
+
+            // store for lookup
+            m_proxyToHub[proxy] = spacialHub;
+
+            common::CameraHub *cameraHub = static_cast<common::CameraHub*>(cameraComponent->buildHub(
+                proxy->name(), project, spacialHub));
+
+            cameraHub->setRef(common::ObjectRef::buildRef(project, cameraHub->typeRef()));
+
+            // @todo camera settings
+
+            spacialHub->addHub(cameraHub);
+        } else if (currentProxy->objectType() == ObjectProxy::OBJECT_LIGHT_MODEL) {
+            // @todo need light hub
+        } else if (currentProxy->objectType() == ObjectProxy::OBJECT_SKIN) {
+            // @todo need skin proxy and skin hub
+        }
+
         currentProxy = currentProxy->recursiveNext(cursor);
     }
+
+    m_proxyToHub.clear();
 
     return True;
 }

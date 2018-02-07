@@ -158,6 +158,24 @@ LightModelProxy *ObjectsProxy::lightModel(o3d::UInt32 i)
     return nullptr;
 }
 
+RootModelProxy *ObjectsProxy::rootProxy(o3d::UInt32 i)
+{
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new RootModelProxy(node);
+    }
+    return nullptr;
+}
+
+NullModelProxy *ObjectsProxy::nullProxy(o3d::UInt32 i)
+{
+    FBXNode *node = m_node->childAt(i);
+    if (node) {
+        return new NullModelProxy(node);
+    }
+    return nullptr;
+}
+
 NodeAttributeProxy* ObjectsProxy::nodeAttribute(o3d::UInt32 i)
 {
     FBXNode *node = m_node->childAt(i);
@@ -218,9 +236,9 @@ ObjectProxy::ObjectType ObjectsProxy::nodeType(FBXNode *node)
             } else if (subClass == "LimbNode") {
                 return ObjectProxy::OBJECT_LIMB_NODE_MODEL;
             } else if (subClass == "Null") {
-                return ObjectProxy::OBJECT_MODEL; // OBJECT_NULL;
+                return ObjectProxy::OBJECT_NULL_NODE;
             } else if (subClass == "Root") {
-                return ObjectProxy::OBJECT_MODEL; // OBJECT_ROOT;
+                return ObjectProxy::OBJECT_ROOT_NODE;
             }
 
             return ObjectProxy::OBJECT_MODEL;

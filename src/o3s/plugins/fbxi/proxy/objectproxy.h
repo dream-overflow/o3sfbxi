@@ -64,6 +64,8 @@ public:
     void setParent(ObjectProxy *parent);
     void addChild(ObjectProxy *proxy);
 
+    ObjectProxy* parent();
+
     void setNodeAttribute(NodeAttributeProxy *attr);
     NodeAttributeProxy* nodeAttribute();
 

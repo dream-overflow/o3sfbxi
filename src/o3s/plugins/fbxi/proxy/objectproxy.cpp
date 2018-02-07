@@ -76,6 +76,11 @@ void ObjectProxy::addChild(ObjectProxy *proxy)
     m_children.push_back(proxy);
 }
 
+ObjectProxy *ObjectProxy::parent()
+{
+    return m_parent;
+}
+
 void ObjectProxy::setNodeAttribute(NodeAttributeProxy *attr)
 {
     m_nodeAttr = attr;
