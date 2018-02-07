@@ -18,7 +18,8 @@ using namespace o3d::studio::fbxi;
 ObjectProxy::ObjectProxy(FBXNode *node) :
     Proxy(node),
     m_objectType(OBJECT_UNDEFINED),
-    m_parent(nullptr)
+    m_parent(nullptr),
+    m_nodeAttr(nullptr)
 {
 }
 
@@ -75,6 +76,16 @@ void ObjectProxy::addChild(ObjectProxy *proxy)
     m_children.push_back(proxy);
 }
 
+void ObjectProxy::setNodeAttribute(NodeAttributeProxy *attr)
+{
+    m_nodeAttr = attr;
+}
+
+NodeAttributeProxy *ObjectProxy::nodeAttribute()
+{
+    return m_nodeAttr;
+}
+
 ObjectProxy* ObjectProxy::recursiveNext(std::list<size_t> &cursor)
 {
     ObjectProxy *result = nullptr;
@@ -86,7 +97,7 @@ ObjectProxy* ObjectProxy::recursiveNext(std::list<size_t> &cursor)
         node = node->m_parent;
 
         if (cursor.empty() || node == nullptr) {
-            break;
+            return nullptr;
         }
     }
 

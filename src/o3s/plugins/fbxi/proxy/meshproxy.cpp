@@ -17,7 +17,8 @@
 using namespace o3d::studio::fbxi;
 
 MeshNodeProxy::MeshNodeProxy(FBXNode *node) :
-    NodeAttributeProxy(node)
+    NodeAttributeProxy(node),
+    m_geometry(nullptr)
 {
     if (subClass() != "Mesh") {
         O3D_ERROR(E_InvalidParameter("Must be sub class mesh"));
@@ -25,6 +26,30 @@ MeshNodeProxy::MeshNodeProxy(FBXNode *node) :
 
     // @todo check Version == 100
     m_objectType = OBJECT_MESH_NODE_ATTR;
+}
+
+void MeshNodeProxy::setGeometry(GeometryProxy *geometry)
+{
+    m_geometry = geometry;
+}
+
+GeometryProxy *MeshNodeProxy::geometry()
+{
+    return m_geometry;
+}
+
+MaterialProxy *MeshNodeProxy::material(o3d::UInt32 idx)
+{
+    if (idx > (UInt32)m_materials.size()) {
+        O3D_ERROR(E_IndexOutOfRange("Material index"));
+    }
+
+    return m_materials[idx];
+}
+
+o3d::UInt32 MeshNodeProxy::numMaterials() const
+{
+    return (UInt32)m_materials.size();
 }
 
 MeshModelProxy::MeshModelProxy(FBXNode *node) :

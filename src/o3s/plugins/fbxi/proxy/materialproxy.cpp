@@ -17,7 +17,8 @@
 using namespace o3d::studio::fbxi;
 
 MaterialProxy::MaterialProxy(FBXNode *node) :
-    ObjectProxy(node)
+    ObjectProxy(node),
+    m_textures{0}
 {
     if (!m_node || m_node->name() != "Material") {
         O3D_ERROR(E_InvalidParameter("Must be a Material node"));
@@ -25,4 +26,18 @@ MaterialProxy::MaterialProxy(FBXNode *node) :
 
     // @todo check Version == 100
     m_objectType = OBJECT_MATERIAL;
+
+    for (UInt32 i = 0; i < MAP_NORMAL+1; ++i) {
+        m_textures[i] = nullptr;
+    }
+}
+
+void MaterialProxy::setTexture(MaterialProxy::MapType map, TextureProxy *texture)
+{
+    m_textures[map] = texture;
+}
+
+TextureProxy *MaterialProxy::texture(MaterialProxy::MapType map)
+{
+    return m_textures[map];
 }

@@ -15,15 +15,33 @@ namespace o3d {
 namespace studio {
 namespace fbxi {
 
+class TextureProxy;
+
 class MaterialProxy : public ObjectProxy
 {
 public:
+
+    enum MapType
+    {
+        MAP_AMBIENT = 0,
+        MAP_DIFFUSE,
+        MAP_EMISSIVE,
+        MAP_SPECULAR,
+        MAP_NORMAL
+    };
 
     /**
      * @brief MaterialProxy
      * @param node Node named material
      */
     MaterialProxy(FBXNode *node);
+
+    void setTexture(MapType map, TextureProxy *texture);
+    TextureProxy* texture(MapType map);
+
+protected:
+
+    TextureProxy *m_textures[MAP_NORMAL+1];
 };
 
 } // namespace fbxi

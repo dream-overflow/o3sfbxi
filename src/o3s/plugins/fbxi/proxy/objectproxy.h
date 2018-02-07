@@ -15,6 +15,8 @@ namespace o3d {
 namespace studio {
 namespace fbxi {
 
+class NodeAttributeProxy;
+
 class ObjectProxy : public Proxy
 {
 public:
@@ -62,6 +64,9 @@ public:
     void setParent(ObjectProxy *parent);
     void addChild(ObjectProxy *proxy);
 
+    void setNodeAttribute(NodeAttributeProxy *attr);
+    NodeAttributeProxy* nodeAttribute();
+
     ObjectProxy* recursiveNext(std::list<size_t> &cursor);
 
 protected:
@@ -70,6 +75,8 @@ protected:
 
     ObjectProxy *m_parent;
     std::vector<ObjectProxy*> m_children;
+
+    NodeAttributeProxy *m_nodeAttr;
 };
 
 } // namespace fbxi

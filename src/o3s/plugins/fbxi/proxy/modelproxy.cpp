@@ -40,10 +40,12 @@ o3d::Vector3 ModelProxy::position()
 {
     Vector3 pos;
     FBXNode *p70 = m_node->child("Properties70");
-//    if (p70) {
-//        pos = p70->interpretAsVector3();
-//        "Lcl Translation"
-//    }
+    if (p70) {
+        FBXNode *vNode = p70->child("Lcl Translation");
+        if (vNode) {
+            pos = vNode->interpretAsVector3();
+        }
+    }
 
     return pos;
 }
@@ -52,10 +54,12 @@ o3d::Vector3 ModelProxy::rotation()
 {
     Vector3 rot;
     FBXNode *p70 = m_node->child("Properties70");
-//    if (p70) {
-//        pos = p70->interpretAsVector3();
-//        "Lcl Rotation"
-//    }
+    if (p70) {
+        FBXNode *vNode = p70->child("Lcl Rotation");
+        if (vNode) {
+            rot = vNode->interpretAsVector3();
+        }
+    }
 
     return rot;
 }
@@ -64,10 +68,12 @@ o3d::Vector3 ModelProxy::scale()
 {
     Vector3 scale;  
     FBXNode *p70 = m_node->child("Properties70");
-//    if (p70) {
-//        pos = p70->interpretAsVector3();
-//        "Lcl Scaling"
-//    }
+    if (p70) {
+        FBXNode *vNode = p70->child("Lcl Scaling");
+        if (vNode) {
+            scale = vNode->interpretAsVector3();
+        }
+    }
 
     return scale;
 }

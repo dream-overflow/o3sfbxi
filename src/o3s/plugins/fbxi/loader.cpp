@@ -20,6 +20,7 @@
 
 #include "proxy/modelproxy.h"
 #include "proxy/materialproxy.h"
+#include "proxy/textureproxy.h"
 #include "proxy/cameraproxy.h"
 #include "proxy/lightproxy.h"
 #include "proxy/textureproxy.h"
@@ -229,17 +230,29 @@ void Loader::load()
                 // @todo subclasses
                 if (childType == ObjectProxy::OBJECT_NODE_ATTRIBUTE) {
                     // must be assigned to only one parent model
-//                    if (childProxy->nodeAttribute != nullptr) {
-//                        O3D_ERROR(E_InvalidPrecondition("Node attribute is already assigned to a parent"));
-//                    }
+                    if (parentProxy->nodeAttribute() != nullptr) {
+                        O3D_ERROR(E_InvalidPrecondition("A node attribute is already assigned to this parent"));
+                    } else {
+                        parentProxy->setNodeAttribute(static_cast<NodeAttributeProxy*>(childProxy));
+                    }
                 }
 
                 ObjectProxy::ObjectType parentType = parentProxy->objectType();
                 if (parentType == ObjectProxy::OBJECT_MESH_MODEL) {
                     if (childType == ObjectProxy::OBJECT_GEOMETRY) {
-                        // @todo setup geometry resource to mesh
+                        GeometryProxy* geometryProxy = static_cast<GeometryProxy*>(parentProxy);
+                        MeshNodeProxy* meshProxy = static_cast<MeshNodeProxy*>(parentProxy);
+
+                        if (meshProxy->geometry() != nullptr) {
+                            O3D_ERROR(E_InvalidPrecondition("Geometry is already assigned to this mesh"));
+                        } else {
+                            meshProxy->setGeometry(geometryProxy);
+                        }
                     } else if (childType == ObjectProxy::OBJECT_MATERIAL) {
-                        // @todo setup material to mesh
+                        MaterialProxy* materialProxy = static_cast<MaterialProxy*>(materialProxy);
+                        MeshNodeProxy* meshProxy = static_cast<MeshNodeProxy*>(parentProxy);
+
+                        meshProxy->addMaterial(materialProxy);
                     }
                 } else if (parentType == ObjectProxy::OBJECT_SKIN) {
                     if (childType == ObjectProxy::OBJECT_CLUSTER) {
@@ -294,14 +307,22 @@ void Loader::load()
 
                 ObjectProxy::ObjectType parentType = parentProxy->objectType();
                 if (parentType == ObjectProxy::OBJECT_MATERIAL) {
-//                    common::MaterialHub *materialHub = static_cast<MaterialHub*>(parentHub);
-//                    if (childType == ObjectProxy::OBJECT_TEXTURE) {
-//                        if (propertyName == "NormalMap") {
-//                            // @todo set texture
-//                        } else if (propertyName == "DiffuseColor") {
-//                            // @todo set texture
-//                        }
-//                    }
+                    MaterialProxy *materialProxy = static_cast<MaterialProxy*>(parentProxy);
+                    TextureProxy *textureProxy = static_cast<TextureProxy*>(childProxy);
+
+                    if (childType == ObjectProxy::OBJECT_TEXTURE) {
+                        if (propertyName == "AmbientMap") {
+                            materialProxy->setTexture(MaterialProxy::MAP_AMBIENT, textureProxy);
+                        } else if (propertyName == "DiffuseColor") {
+                            materialProxy->setTexture(MaterialProxy::MAP_DIFFUSE, textureProxy);
+                        } else if (propertyName == "EmissiveColor") {
+                            materialProxy->setTexture(MaterialProxy::MAP_EMISSIVE, textureProxy);
+                        } else if (propertyName == "SpecularMap") {
+                            materialProxy->setTexture(MaterialProxy::MAP_SPECULAR, textureProxy);
+                        } else if (propertyName == "NormalColor") {
+                            materialProxy->setTexture(MaterialProxy::MAP_NORMAL, textureProxy);
+                        }
+                    }
                 }
             }
         }
@@ -310,5 +331,14 @@ void Loader::load()
     }
 
     // processGeometry for mesh
-    // @todo Post process each OBJECT_CLUSTER
+
+
+    // post process each OBJECT_CLUSTER
+    for (auto it = m_objects.begin(); it != m_objects.end(); ++it) {
+        ObjectProxy *object = it->second;
+        if (object->objectType() == ObjectProxy::OBJECT_CLUSTER) {
+            //static_cast<ClusterProxy*>(object)->postProcess();
+            // @todo
+        }
+    }
 }

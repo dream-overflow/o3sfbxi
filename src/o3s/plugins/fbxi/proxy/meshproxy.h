@@ -12,9 +12,14 @@
 #include "nodeattributeproxy.h"
 #include "modelproxy.h"
 
+#include <vector>
+
 namespace o3d {
 namespace studio {
 namespace fbxi {
+
+class GeometryProxy;
+class MaterialProxy;
 
 class MeshNodeProxy : public NodeAttributeProxy
 {
@@ -25,6 +30,19 @@ public:
      * @param node Node subclassed Mesh
      */
     MeshNodeProxy(FBXNode *node);
+
+    void setGeometry(GeometryProxy *geometry);
+    GeometryProxy* geometry();
+
+    void addMaterial(MaterialProxy *material);
+    MaterialProxy* material(UInt32 idx);
+
+    o3d::UInt32 numMaterials() const;
+
+protected:
+
+    GeometryProxy *m_geometry;
+    std::vector<MaterialProxy*> m_materials;
 };
 
 class MeshModelProxy : public ModelProxy
