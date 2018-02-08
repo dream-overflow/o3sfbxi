@@ -71,7 +71,7 @@ public:
     virtual common::ImportDefinition* import(
             const String &filename,
             common::ImporterOption *options,
-            common::Entity *parent) override;
+            common::Hub *parent) override;
 };
 
 } // namespace fbxi

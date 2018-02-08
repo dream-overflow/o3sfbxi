@@ -53,10 +53,9 @@ o3d::studio::common::ImportDefinition *Importer::introspect(const o3d::String &f
     }
 }
 
-o3d::studio::common::ImportDefinition *Importer::import(
-        const o3d::String &filename,
+o3d::studio::common::ImportDefinition *Importer::import(const o3d::String &filename,
         common::ImporterOption *options,
-        common::Entity *parent)
+        common::Hub *parent)
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
     FbxImportDefinition *def = new FbxImportDefinition();

@@ -34,7 +34,7 @@ public:
     O3SAdapter(
             Parser *parser,
             common::ImporterOption *options,
-            common::Entity *parent,
+            common::Hub *parent,
             FbxImportDefinition* def);
 
     virtual ~O3SAdapter();
@@ -50,7 +50,7 @@ private:
     Loader *m_loader;
 
     common::ImporterOption *m_options;
-    common::Entity *m_parent;
+    common::Hub *m_parent;
 
     std::map<Int64, common::Hub*> m_hubs;
 

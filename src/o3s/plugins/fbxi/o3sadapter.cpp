@@ -56,7 +56,7 @@ using namespace o3d::studio::fbxi;
 
 O3SAdapter::O3SAdapter(Parser *parser,
         o3d::studio::common::ImporterOption *options,
-        o3d::studio::common::Entity *parent,
+        common::Hub *parent,
         FbxImportDefinition* def) :
     m_parser(parser),
     m_loader(nullptr),
@@ -76,26 +76,6 @@ O3SAdapter::O3SAdapter(Parser *parser,
 O3SAdapter::~O3SAdapter()
 {
     deletePtr(m_loader);
-
-//    // delete non assigned hubs (deletion is recursive)
-//    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-//        common::Hub *hub = it->second;
-//        if (!hub->parent()) {
-//            delete hub;
-//        } else {
-//            if (hub->parent()->ref().light().baseTypeOf(common::TypeRef::project())) {
-//                common::Project *project = static_cast<common::Project*>(hub->parent());
-//                if (!project->hub(hub->ref().light())) {
-//                    delete hub;
-//                }
-//            } else if (hub->parent()->ref().light().baseTypeOf(common::TypeRef::hub())) {
-//                common::Hub *parentHub = static_cast<common::Hub*>(hub->parent());
-//                if (!parentHub->hub(hub->ref().light())) {
-//                    delete hub;
-//                }
-//            }
-//        }
-//    }
 }
 
 o3d::Bool O3SAdapter::processImport()
@@ -133,14 +113,10 @@ o3d::Bool O3SAdapter::toScene()
     common::Component *meshComponent = common::Application::instance()->components().component("o3s::common::component::meshhub");
 
     common::Project* project = m_parent->project();
-    common::Hub* rootHub = nullptr;
+    common::Hub* rootHub = m_parent;
 
     common::Hub *parentHub;
     common::Entity *parentEntity;
-
-    if (m_parent->ref().light().baseTypeOf(common::TypeRef::hub())) {
-        rootHub = static_cast<common::Hub*>(m_parent);
-    }
 
     // temporary map to retrieve parent hub
     std::map<ObjectProxy*, common::Hub*> m_proxyToHub;
@@ -176,8 +152,6 @@ o3d::Bool O3SAdapter::toScene()
 
             if (parentHub) {
                 parentHub->addHub(spacialHub);
-            } else {
-                project->addHub(spacialHub);
             }
 
             // store for lookup
@@ -205,8 +179,6 @@ o3d::Bool O3SAdapter::toScene()
 
             if (parentHub) {
                 parentHub->addHub(spacialHub);
-            } else {
-                project->addHub(spacialHub);
             }
 
             // store for lookup
