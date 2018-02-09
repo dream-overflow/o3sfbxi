@@ -60,7 +60,7 @@ public:
     /**
      * @brief Global indices array.
      */
-    SmartArrayInt32 indices();
+    SmartArrayUInt32 indices();
 
     /**
      * @brief Per vertex material id.
@@ -108,7 +108,7 @@ private:
 
     SmartArrayFloat m_vertexData[DATA_BITANGENTS+1];
     SmartArrayInt32 m_materials;
-    SmartArrayInt32 m_indices;
+    SmartArrayUInt32 m_indices;
 
     ArrayInt32 m_toOldVertices;
 

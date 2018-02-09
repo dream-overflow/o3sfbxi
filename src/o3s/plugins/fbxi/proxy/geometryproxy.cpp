@@ -63,7 +63,7 @@ o3d::SmartArrayFloat GeometryProxy::vertexData(GeometryProxy::VertexData v)
     return m_vertexData[v];
 }
 
-o3d::SmartArrayInt32 GeometryProxy::indices()
+o3d::SmartArrayUInt32 GeometryProxy::indices()
 {
     return m_indices;
 }
@@ -332,8 +332,8 @@ o3d::Bool GeometryProxy::readVertexData(
     }
 
     FBXNode *version = node->child("Version");
-    if (!version || version->directAsInt32() != 101) {
-        O3D_ERROR(E_InvalidFormat(String("Must be a {0} node version 101").arg(node->name())));
+    if (!version || version->directAsInt32() < 101) {
+        O3D_ERROR(E_InvalidFormat(String("Must be a {0} node version >=101").arg(node->name())));
     }
 
     FBXNode *mappingInformationType = node->child("MappingInformationType");
@@ -389,7 +389,12 @@ o3d::Bool GeometryProxy::readVertexData(
 
 void GeometryProxy::mergeVertexData()
 {
-    // @todo need to refine because of doubled vertices during triangulation
+    // @todo need to refine vertex data because of doubled vertices during triangulation
+
+    m_indices.allocate(m_toOldVertices.getSize());
+    for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
+        m_indices[i] = i;
+    }
 }
 
 void GeometryProxy::mergeMaterials()

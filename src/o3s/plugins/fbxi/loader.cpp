@@ -255,7 +255,7 @@ void Loader::load()
 
                 if (parentType == ObjectProxy::OBJECT_MESH_MODEL) {
                     if (childType == ObjectProxy::OBJECT_GEOMETRY) {
-                        GeometryProxy* geometryProxy = static_cast<GeometryProxy*>(parentProxy);
+                        GeometryProxy* geometryProxy = static_cast<GeometryProxy*>(childProxy);
                         MeshModelProxy* meshProxy = static_cast<MeshModelProxy*>(parentProxy);
 
                         if (meshProxy->geometry() != nullptr) {

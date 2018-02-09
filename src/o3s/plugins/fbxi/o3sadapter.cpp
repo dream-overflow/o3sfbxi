@@ -163,6 +163,11 @@ o3d::Bool O3SAdapter::toScene()
             meshHub->setRef(common::ObjectRef::buildRef(project, meshHub->typeRef()));
 
             // @todo geometry
+            meshHub->setVertices(proxy->geometry()->vertexData(GeometryProxy::DATA_VERTICES));
+            meshHub->setNormals(proxy->geometry()->vertexData(GeometryProxy::DATA_NORMALS));
+            meshHub->setUVs(proxy->geometry()->vertexData(GeometryProxy::DATA_UVS));
+
+            meshHub->addIndices(proxy->geometry()->indices());
 
             spacialHub->addHub(meshHub);
         } else if (currentProxy->objectType() == ObjectProxy::OBJECT_CAMERA_MODEL) {
