@@ -65,12 +65,14 @@ o3d::Bool Parser::parse()
 
     Bool result = False;
 
-    if (version == 7300) {
-        result = parseBinary7300();
-    } else if (version >= 7400) {
-        result = parseBinary7400();
+    if (version >= 7000 && version < 8000) {
+        // major and minor version number
+        m_version[0] = version / 1000;
+        m_version[1] = (version - m_version[0] * 1000) / 100;
+
+        result = parseBinary7(m_version[1]);
     } else {
-        O3D_ERROR(E_InvalidFormat(String("Unsupported FBX version ").arg(version)));
+        O3D_ERROR(E_InvalidFormat(String("Unsupported FBX version {0}").arg(version)));
     }
 
     return result;
@@ -98,11 +100,21 @@ const FBXNode *Parser::child(const o3d::String &name) const
     return nullptr;
 }
 
-o3d::Bool Parser::parseBinary7300()
+o3d::UInt32 Parser::majorVersion() const
+{
+    return m_version[0];
+}
+
+o3d::UInt32 Parser::minorVersion() const
+{
+    return m_version[1];
+}
+
+o3d::Bool Parser::parseBinary7(UInt32 subVersion)
 {
     // parse the root node (present in binary mode, not in ascii)
     while (!m_stream.isEnd()) {
-        if (!parseNodeBinary7300(nullptr)) {
+        if (!parseNodeBinary7(nullptr, subVersion)) {
             break;
         }
     }
@@ -110,25 +122,7 @@ o3d::Bool Parser::parseBinary7300()
     return True;
 }
 
-o3d::Bool Parser::parseBinary7400()
-{
-    // parse the root node (present in binary mode, not in ascii)
-    while (!m_stream.isEnd()) {
-        if (!parseNodeBinary7400(nullptr)) {
-            break;
-        }
-    }
-
-    return True;
-}
-
-o3d::Bool Parser::parseNodeBinary7300(FBXNode *parent)
-{
-    // @todo if necessary
-    return False;
-}
-
-o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
+o3d::Bool Parser::parseNodeBinary7(FBXNode *parent, UInt32 subVersion)
 {
     UInt32 endOfs, numProps, propListLen;
     String name;
@@ -242,7 +236,7 @@ o3d::Bool Parser::parseNodeBinary7400(FBXNode *parent)
     // nested properties
     if (m_stream.getPosition() < endOfs) {
         while (m_stream.getPosition() + 13 < endOfs) {
-            parseNodeBinary7400(node);
+            parseNodeBinary7(node, subVersion);
         }
 
         // node terminating 13 null bytes

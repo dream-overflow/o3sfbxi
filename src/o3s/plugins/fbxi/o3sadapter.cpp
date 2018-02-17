@@ -100,9 +100,7 @@ o3d::Bool O3SAdapter::processImport()
 
 o3d::Bool O3SAdapter::toScene()
 {
-    // @todo from loader
     // setup model node to editor
-    // @todo remove hub instances above
     ObjectProxy *currentProxy = m_loader->objectProxy(0);
     std::list<size_t> cursor;
     cursor.push_back(0);
@@ -111,6 +109,15 @@ o3d::Bool O3SAdapter::toScene()
     common::Component *cameraComponent = common::Application::instance()->components().component("o3s::common::component::camerahub");
     // common::Component *lightComponent = common::Application::instance()->components().component("o3s::common::component::lighthub");
     common::Component *meshComponent = common::Application::instance()->components().component("o3s::common::component::meshhub");
+    // common::Component *skinComponent = common::Application::instance()->components().component("o3s::common::component::skinhub");
+    // common::Component *boneComponent = common::Application::instance()->components().component("o3s::common::component::bonehub");
+
+    // common::Component *animationComponent = common::Application::instance()->components().component("o3s::common::component::animationhub");
+    // ...
+
+    // common::Component *materialComponent = common::Application::instance()->components().component("o3s::common::component::materialresource");
+    // common::Component *textureComponent = common::Application::instance()->components().component("o3s::common::component::textureresource");
+    // common::Component *geometryComponent = common::Application::instance()->components().component("o3s::common::component::geometryresource");
 
     common::Project* project = m_parent->project();
     common::Hub* rootHub = m_parent;
@@ -121,8 +128,6 @@ o3d::Bool O3SAdapter::toScene()
     // temporary map to retrieve parent hub
     std::map<ObjectProxy*, common::Hub*> m_proxyToHub;
     m_proxyToHub[currentProxy] = rootHub;
-
-    // @todo mesh geometry, skin, skeleton, material, texture
 
     while (currentProxy != nullptr) {
         System::print(currentProxy->name(), currentProxy->subClass() + String(" uid={0}").arg(currentProxy->uid()));
@@ -162,12 +167,24 @@ o3d::Bool O3SAdapter::toScene()
 
             meshHub->setRef(common::ObjectRef::buildRef(project, meshHub->typeRef()));
 
-            // @todo geometry
+            //
+            // geometry
+            //
+
+            // @todo geometry resource
             meshHub->setVertices(proxy->geometry()->vertexData(GeometryProxy::DATA_VERTICES));
             meshHub->setNormals(proxy->geometry()->vertexData(GeometryProxy::DATA_NORMALS));
             meshHub->setUVs(proxy->geometry()->vertexData(GeometryProxy::DATA_UVS));
+            // meshHub->setColors(proxy->geometry()->vertexData(GeometryProxy::DATA_COLORS));
 
+            // @todo optimized indices (16 or 32 bits) and per sub array
             meshHub->addIndices(proxy->geometry()->indices());
+
+            //
+            // materials and textures
+            //
+
+            // @todo
 
             spacialHub->addHub(meshHub);
         } else if (currentProxy->objectType() == ObjectProxy::OBJECT_CAMERA_MODEL) {
@@ -198,10 +215,14 @@ o3d::Bool O3SAdapter::toScene()
 
             spacialHub->addHub(cameraHub);
         } else if (currentProxy->objectType() == ObjectProxy::OBJECT_LIGHT_MODEL) {
-            // @todo need light hub
+            // @todo need light hub           
+            // @todo light type and parameters
         } else if (currentProxy->objectType() == ObjectProxy::OBJECT_SKIN) {
             // @todo need skin proxy and skin hub
+            // @todo get and setup the skeleton from sub tree of bone models
         }
+
+        // @todo animations
 
         currentProxy = currentProxy->recursiveNext(cursor);
     }
@@ -220,37 +241,3 @@ o3d::studio::common::Hub *O3SAdapter::hub(o3d::Int64 uid)
 
     return nullptr;
 }
-
-//                case ObjectProxy::OBJECT_LIMB_NODE_MODEL:
-//                {
-//                    BoneModelProxy *lp = objects->boneModel(i);
-//                    m_objects[lp->uid()] = lp;
-
-//                    // @todo uses a Bone component
-//                    common::Component *component = common::Application::instance()->components().component("o3s::common::component::spacialhub");
-//                    common::SpacialNodeHub *hub = static_cast<common::SpacialNodeHub*>(component->buildHub("Bone " + lp->name(), project, project));
-
-//                    hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-//                    hub->setProject(project);
-
-//                    // parent will be know during connections
-//                    m_hubs[lp->uid()] = hub;
-//                }
-//                    break;
-//                case ObjectProxy::OBJECT_TEXTURE:
-//                {
-//                    TextureProxy *tp = objects->texture(i);
-//                    m_objects[tp->uid()] = tp;
-
-//                    // @todo add a TextureResource/hub ?
-
-//                    // hub->setRef(common::ObjectRef::buildRef(project, hub->typeRef()));
-//                    // hub->setProject(project);
-
-//                    // @todo
-//                }
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }

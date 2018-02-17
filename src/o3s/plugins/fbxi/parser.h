@@ -29,15 +29,16 @@ public:
     FBXNode *child(const String &name);
     const FBXNode *child(const String &name) const;
 
+    UInt32 majorVersion() const;
+    UInt32 minorVersion() const;
+
 private:
 
     InStream &m_stream;
+    UInt32 m_version[2];
 
-    Bool parseBinary7300();
-    Bool parseBinary7400();
-
-    Bool parseNodeBinary7300(FBXNode *parent);
-    Bool parseNodeBinary7400(FBXNode *parent);
+    Bool parseBinary7(UInt32 subVersion);
+    Bool parseNodeBinary7(FBXNode *parent, UInt32 subVersion);
 
     String readString();
 

@@ -39,8 +39,11 @@ static void remapVertexData(
         o3d::SmartArrayFloat &out,
         const o3d::ArrayInt32 &map);
 
+static o3d::Int32 getTriCountFromPoly(const o3d::SmartArrayInt32 &indices, o3d::Int32 *idx);
+
 GeometryProxy::GeometryProxy(FBXNode *node) :
-    ObjectProxy(node)
+    ObjectProxy(node),
+    m_materialsCount(0)
 {
     if (!m_node || m_node->name() != "Geometry") {
         O3D_ERROR(E_InvalidParameter("Must be a Geometry node"));
@@ -91,7 +94,7 @@ o3d::UInt32 GeometryProxy::numMaterials() const
     return (UInt32)m_perMaterialIndices.size();
 }
 
-o3d::SmartArrayInt32 GeometryProxy::indices(o3d::UInt32 id)
+o3d::SmartArrayUInt32 GeometryProxy::indices(o3d::UInt32 id)
 {
     if (id > (UInt32)m_perMaterialIndices.size()) {
         O3D_ERROR(E_IndexOutOfRange("Material index"));
@@ -147,6 +150,9 @@ o3d::Bool GeometryProxy::processGeometry()
         addVertex(m_toNewVertices[old], i);
     }
 
+    // initially assume a single material
+    m_materialsCount = 1;
+
     FBXNode *layerElementMaterial = m_node->child("LayerElementMaterial");
     if (layerElementMaterial) {
         FBXNode *version = layerElementMaterial->child("Version");
@@ -178,7 +184,7 @@ o3d::Bool GeometryProxy::processGeometry()
                 O3D_ERROR(E_InvalidFormat(String("Missing {0} data").arg("Materials")));
             }
 
-            SmartArrayInt32 orginalMaterialsArray = materialsArray->value();
+            SmartArrayInt32 originalMaterialsArray = materialsArray->value();
             m_materials.allocate(m_vertexData[DATA_VERTICES].getSize() / 3);
 
             // unitialized materials
@@ -187,13 +193,13 @@ o3d::Bool GeometryProxy::processGeometry()
             }
 
             Int32 tmpI = 0, c = 0;
-            for (UInt32 poly = 0; poly < orginalMaterialsArray.getSize(); ++poly) {
-                // @todo and regroup by material id to form many indices arrays
-//                UInt32 triCount = getTriCountFromPoly(originalIndices, &tmpI);
-//                for (UInt32 i = 0; i < triCount; ++i) {
-//                    m_materials[c] = orginalMaterialsArray[poly];
-//                    ++c;
-//                }
+            for (UInt32 poly = 0; poly < originalMaterialsArray.getSize(); ++poly) {
+                UInt32 triCount = getTriCountFromPoly(originalIndices, &tmpI);
+                for (UInt32 i = 0; i < triCount; ++i) {
+                    m_materials[c] = originalMaterialsArray[poly];
+                    m_materialsCount = o3d::max(m_materialsCount, originalMaterialsArray[poly]);
+                    ++c;
+                }
             }
         } else {
             if (mapTypeName != "AllSame") {
@@ -222,34 +228,34 @@ o3d::Bool GeometryProxy::processGeometry()
         }
     }
 
-    // tangents
-    FBXNode *layerElementTangents = m_node->child("LayerElementTangents");
-    if (layerElementTangents) {
-        SmartArrayDouble array;
-        SmartArrayInt32 indices;
-        MapType mapping;
+    // tangents (useless, computed later as necessary)
+//    FBXNode *layerElementTangents = m_node->child("LayerElementTangents");
+//    if (layerElementTangents) {
+//        SmartArrayDouble array;
+//        SmartArrayInt32 indices;
+//        MapType mapping;
 
-        if (layerElementTangents->child("Tangent")) {
-            readVertexData(layerElementTangents,
-                           "Tangent",
-                           "TangentIndex",
-                           array,
-                           indices,
-                           mapping);
-        } else if (layerElementTangents->child("Tangents")) {
-            readVertexData(layerElementTangents,
-                           "Tangents",
-                           "TangentsIndex",
-                           array,
-                           indices,
-                           mapping);
-        }
+//        if (layerElementTangents->child("Tangent")) {
+//            readVertexData(layerElementTangents,
+//                           "Tangent",
+//                           "TangentIndex",
+//                           array,
+//                           indices,
+//                           mapping);
+//        } else if (layerElementTangents->child("Tangents")) {
+//            readVertexData(layerElementTangents,
+//                           "Tangents",
+//                           "TangentsIndex",
+//                           array,
+//                           indices,
+//                           mapping);
+//        }
 
-        if (!array.isEmpty()) {
-            splatVertexData(3, m_vertexData[DATA_TANGENTS], mapping, array, indices, originalIndices);
-            remapVertexData(3, m_vertexData[DATA_TANGENTS], toOldIndices);
-        }
-    }
+//        if (!array.isEmpty()) {
+//            splatVertexData(3, m_vertexData[DATA_TANGENTS], mapping, array, indices, originalIndices);
+//            remapVertexData(3, m_vertexData[DATA_TANGENTS], toOldIndices);
+//        }
+//    }
 
     // colors
     FBXNode *layerElementColor = m_node->child("LayerElementColor");
@@ -314,7 +320,7 @@ o3d::Bool GeometryProxy::processGeometry()
     // Culling: "CullingOff"
 
     mergeVertexData();
-    mergeMaterials();
+    buildIndicesPerMaterial();
 
     return True;
 }
@@ -389,17 +395,243 @@ o3d::Bool GeometryProxy::readVertexData(
 
 void GeometryProxy::mergeVertexData()
 {
-    // @todo need to refine vertex data because of doubled vertices during triangulation
+    // need to refine vertex data because of doubled vertices during triangulation
+#if 1
+    // originals arrays
+    SmartArrayFloat originalVertices = m_vertexData[DATA_VERTICES];
+    SmartArrayFloat originalColors = m_vertexData[DATA_COLORS];
+    SmartArrayFloat originalUVs = m_vertexData[DATA_UVS];
+    SmartArrayFloat originalNormals = m_vertexData[DATA_NORMALS];
 
+    ArrayUInt32 indices;
+
+    if (originalNormals.isValid() && originalColors.isValid() && originalUVs.isValid()) {
+        // vertices normals colors and uvs
+        ArrayFloat vertices, normals, colors, uvs;
+
+        Float *orgV, *cmpV, *orgN, *cmpN, *orgU, *cmpU, *orgC, *cmpC;
+        Int32 idx = -1, p, count = 0;
+
+        for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
+            p = i;
+
+            orgV = &originalVertices[p*3];
+            orgN = &originalNormals[p*3];
+            orgU = &originalUVs[p*2];
+            orgC = &originalColors[p*4];
+
+            idx = -1;
+
+            for (Int32 j = 0; j < count; ++j) {
+                cmpV = &vertices[j*3];
+                cmpN = &normals[j*3];
+                cmpU = &uvs[j*2];
+                cmpC = &colors[j*4];
+
+                if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2] &&
+                    cmpN[0] == orgN[0] && cmpN[1] == orgN[1] && cmpN[2] == orgN[2] &&
+                    cmpU[0] == orgU[0] && cmpU[1] == orgU[1] &&
+                    cmpC[0] == orgC[0] && cmpC[1] == orgC[1] && cmpC[2] == orgC[2] && cmpC[3] == orgC[3]) {
+                    // reuse index
+                    idx = (Int32)j;
+                    break;
+                }
+            }
+
+            // not found push
+            if (idx == -1) {
+                vertices.push(orgV[0]);
+                vertices.push(orgV[1]);
+                vertices.push(orgV[2]);
+
+                normals.push(orgN[0]);
+                normals.push(orgN[1]);
+                normals.push(orgN[2]);
+
+                uvs.push(orgU[0]);
+                uvs.push(orgU[1]);
+
+                colors.push(orgC[0]);
+                colors.push(orgC[1]);
+                colors.push(orgC[2]);
+                colors.push(orgC[3]);
+
+                // new
+                indices.push(count);
+                ++count;
+            } else {
+                // shared
+                indices.push((UInt32)idx);
+            }
+        }
+
+        m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
+        m_vertexData[DATA_NORMALS] = SmartArrayFloat(normals.getData(), normals.getSize());
+        m_vertexData[DATA_UVS] = SmartArrayFloat(uvs.getData(), uvs.getSize());
+        m_vertexData[DATA_COLORS] = SmartArrayFloat(colors.getData(), colors.getSize());
+    } else if (originalNormals.isValid() && originalUVs.isValid()) {
+        // vertices normals and uvs
+        ArrayFloat vertices, normals, uvs;
+
+        Float *orgV, *cmpV, *orgN, *cmpN, *orgU, *cmpU;
+        Int32 idx = -1, p, count = 0;
+
+        for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
+            p = i;
+
+            orgV = &originalVertices[p*3];
+            orgN = &originalNormals[p*3];
+            orgU = &originalUVs[p*2];
+
+            idx = -1;
+
+            for (Int32 j = 0; j < count; ++j) {
+                cmpV = &vertices[j*3];
+                cmpN = &normals[j*3];
+                cmpU = &uvs[j*2];
+
+                if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2] &&
+                    cmpN[0] == orgN[0] && cmpN[1] == orgN[1] && cmpN[2] == orgN[2] &&
+                    cmpU[0] == orgU[0] && cmpU[1] == orgU[1]) {
+                    // reuse index
+                    idx = (Int32)j;
+                    break;
+                }
+            }
+
+            // not found push
+            if (idx == -1) {
+                vertices.push(orgV[0]);
+                vertices.push(orgV[1]);
+                vertices.push(orgV[2]);
+
+                normals.push(orgN[0]);
+                normals.push(orgN[1]);
+                normals.push(orgN[2]);
+
+                uvs.push(orgU[0]);
+                uvs.push(orgU[1]);
+
+                // new
+                indices.push(count);
+                ++count;
+            } else {
+                // shared
+                indices.push((UInt32)idx);
+            }
+        }
+
+        m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
+        m_vertexData[DATA_NORMALS] = SmartArrayFloat(normals.getData(), normals.getSize());
+        m_vertexData[DATA_UVS] = SmartArrayFloat(uvs.getData(), uvs.getSize());
+    } else if (originalNormals.isValid()) {
+        // vertices and normals
+        ArrayFloat vertices, normals;
+
+        Float *orgV, *cmpV, *orgN, *cmpN;
+        Int32 idx = -1, p, count = 0;
+
+        for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
+            p = i;
+
+            orgV = &originalVertices[p*3];
+            orgN = &originalNormals[p*3];
+
+            idx = -1;
+
+            for (Int32 j = 0; j < count; ++j) {
+                cmpV = &vertices[j*3];
+                cmpN = &normals[j*3];
+
+                if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2] &&
+                    cmpN[0] == orgN[0] && cmpN[1] == orgN[1] && cmpN[2] == orgN[2]) {
+                    // reuse index
+                    idx = (Int32)j;
+                    break;
+                }
+            }
+
+            // not found push
+            if (idx == -1) {
+                vertices.push(orgV[0]);
+                vertices.push(orgV[1]);
+                vertices.push(orgV[2]);
+
+                normals.push(orgN[0]);
+                normals.push(orgN[1]);
+                normals.push(orgN[2]);
+
+                // new
+                indices.push(count);
+                ++count;
+            } else {
+                // shared
+                indices.push((UInt32)idx);
+            }
+        }
+
+        m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
+        m_vertexData[DATA_NORMALS] = SmartArrayFloat(normals.getData(), normals.getSize());
+    } else {
+        // vertices only
+        ArrayFloat vertices;
+        Float *orgV, *cmpV;
+        Int32 idx = -1, p, count = 0;
+
+        for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
+            p = i;
+
+            orgV = &originalVertices[p*3];
+            idx = -1;
+
+            for (Int32 j = 0; j < count; ++j) {
+                cmpV = &vertices[j*3];
+
+                if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2]) {
+                    // reuse index
+                    idx = j;
+                    break;
+                }
+            }
+
+            // not found push
+            if (idx == -1) {
+                vertices.push(orgV[0]);
+                vertices.push(orgV[1]);
+                vertices.push(orgV[2]);
+
+                // new
+                indices.push(count);
+                ++count;
+            } else {
+                // shared
+                indices.push((UInt32)idx);
+            }
+        }
+
+        m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
+    }
+
+    m_indices = SmartArrayUInt32(indices.getData(), indices.getSize());
+#else
+    // naive direct indices
     m_indices.allocate(m_toOldVertices.getSize());
     for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
         m_indices[i] = i;
     }
+#endif
 }
 
-void GeometryProxy::mergeMaterials()
+void GeometryProxy::buildIndicesPerMaterial()
 {
-    // @todo group indices by material id
+     // group indices by material id
+     for (UInt32 i = 0; i < m_materialsCount; ++i) {
+         ArrayUInt32 indices;
+
+         // @todo
+
+         // m_perMaterialIndices.push_back(SmartArrayUInt32(indices.getData(), indices.getSize()));
+     }
 }
 
 static void triangulate(
@@ -653,4 +885,15 @@ static void remapVertexData(
             }
         }
     }
+}
+
+static o3d::Int32 getTriCountFromPoly(const o3d::SmartArrayInt32 &indices, o3d::Int32 *idx)
+{
+    o3d::Int32 count = 1;
+    while (indices[*idx + 1 + count] >= 0) {
+        ++count;
+    }
+
+    *idx = *idx + 2 + count;
+    return count;
 }

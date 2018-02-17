@@ -25,9 +25,9 @@ public:
         DATA_VERTICES = 0,
         DATA_COLORS = 1,
         DATA_UVS = 2,
-        DATA_NORMALS = 3,
-        DATA_TANGENTS = 4,
-        DATA_BITANGENTS = 5
+        DATA_NORMALS = 3
+        // DATA_TANGENTS = 4,
+        // DATA_BITANGENTS = 5
     };
 
     enum MapType
@@ -81,7 +81,7 @@ public:
      * @brief Indices relative array per material id.
      * @param id Material id.
      */
-    SmartArrayInt32 indices(UInt32 id);
+    SmartArrayUInt32 indices(UInt32 id);
 
     struct Vertex
     {
@@ -104,16 +104,18 @@ private:
             MapType &mapType);
 
     void mergeVertexData();
-    void mergeMaterials();
+    void buildIndicesPerMaterial();
 
-    SmartArrayFloat m_vertexData[DATA_BITANGENTS+1];
+    SmartArrayFloat m_vertexData[4];
     SmartArrayInt32 m_materials;
     SmartArrayUInt32 m_indices;
 
     ArrayInt32 m_toOldVertices;
 
     TemplateArray<Vertex> m_toNewVertices;
-    std::vector<SmartArrayInt32> m_perMaterialIndices;
+    std::vector<SmartArrayUInt32> m_perMaterialIndices;
+
+    Int32 m_materialsCount;
 };
 
 } // namespace fbxi
