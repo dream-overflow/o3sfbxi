@@ -396,6 +396,7 @@ o3d::Bool GeometryProxy::readVertexData(
 void GeometryProxy::mergeVertexData()
 {
     // need to refine vertex data because of doubled vertices during triangulation
+    // it is a brut force approch in O(N^2)
 #if 1
     // originals arrays
     SmartArrayFloat originalVertices = m_vertexData[DATA_VERTICES];
@@ -409,25 +410,21 @@ void GeometryProxy::mergeVertexData()
         // vertices normals colors and uvs
         ArrayFloat vertices, normals, colors, uvs;
 
-        Float *orgV, *cmpV, *orgN, *cmpN, *orgU, *cmpU, *orgC, *cmpC;
-        Int32 idx = -1, p, count = 0;
+        Float *orgV = originalVertices.getData(), *cmpV;
+        Float *orgN = originalNormals.getData(), *cmpN;
+        Float *orgU = originalUVs.getData(), *cmpU;
+        Float *orgC = originalColors.getData(), *cmpC;
+
+        Int32 idx = -1, count = 0;
 
         for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
-            p = i;
-
-            orgV = &originalVertices[p*3];
-            orgN = &originalNormals[p*3];
-            orgU = &originalUVs[p*2];
-            orgC = &originalColors[p*4];
-
             idx = -1;
 
+            cmpV = vertices.getData();
+            cmpN = normals.getData();
+            cmpU = uvs.getData();
+            cmpC = colors.getData();
             for (Int32 j = 0; j < count; ++j) {
-                cmpV = &vertices[j*3];
-                cmpN = &normals[j*3];
-                cmpU = &uvs[j*2];
-                cmpC = &colors[j*4];
-
                 if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2] &&
                     cmpN[0] == orgN[0] && cmpN[1] == orgN[1] && cmpN[2] == orgN[2] &&
                     cmpU[0] == orgU[0] && cmpU[1] == orgU[1] &&
@@ -436,25 +433,19 @@ void GeometryProxy::mergeVertexData()
                     idx = (Int32)j;
                     break;
                 }
+
+                cmpV += 3;
+                cmpN += 3;
+                cmpU += 2;
+                cmpC += 4;
             }
 
             // not found push
             if (idx == -1) {
-                vertices.push(orgV[0]);
-                vertices.push(orgV[1]);
-                vertices.push(orgV[2]);
-
-                normals.push(orgN[0]);
-                normals.push(orgN[1]);
-                normals.push(orgN[2]);
-
-                uvs.push(orgU[0]);
-                uvs.push(orgU[1]);
-
-                colors.push(orgC[0]);
-                colors.push(orgC[1]);
-                colors.push(orgC[2]);
-                colors.push(orgC[3]);
+                vertices.pushArray(orgV, 3);
+                normals.pushArray(orgN, 3);
+                uvs.pushArray(orgU, 2);
+                colors.pushArray(orgC, 4);
 
                 // new
                 indices.push(count);
@@ -463,6 +454,11 @@ void GeometryProxy::mergeVertexData()
                 // shared
                 indices.push((UInt32)idx);
             }
+
+            orgV += 3;
+            orgN += 3;
+            orgU += 2;
+            orgC += 4;
         }
 
         m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
@@ -473,23 +469,19 @@ void GeometryProxy::mergeVertexData()
         // vertices normals and uvs
         ArrayFloat vertices, normals, uvs;
 
-        Float *orgV, *cmpV, *orgN, *cmpN, *orgU, *cmpU;
-        Int32 idx = -1, p, count = 0;
+        Float *orgV = originalVertices.getData(), *cmpV;
+        Float *orgN = originalNormals.getData(), *cmpN;
+        Float *orgU = originalUVs.getData(), *cmpU;
+
+        Int32 idx = -1, count = 0;
 
         for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
-            p = i;
-
-            orgV = &originalVertices[p*3];
-            orgN = &originalNormals[p*3];
-            orgU = &originalUVs[p*2];
-
             idx = -1;
 
+            cmpV = vertices.getData();
+            cmpN = normals.getData();
+            cmpU = uvs.getData();
             for (Int32 j = 0; j < count; ++j) {
-                cmpV = &vertices[j*3];
-                cmpN = &normals[j*3];
-                cmpU = &uvs[j*2];
-
                 if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2] &&
                     cmpN[0] == orgN[0] && cmpN[1] == orgN[1] && cmpN[2] == orgN[2] &&
                     cmpU[0] == orgU[0] && cmpU[1] == orgU[1]) {
@@ -497,20 +489,17 @@ void GeometryProxy::mergeVertexData()
                     idx = (Int32)j;
                     break;
                 }
+
+                cmpV += 3;
+                cmpN += 3;
+                cmpU += 2;
             }
 
             // not found push
             if (idx == -1) {
-                vertices.push(orgV[0]);
-                vertices.push(orgV[1]);
-                vertices.push(orgV[2]);
-
-                normals.push(orgN[0]);
-                normals.push(orgN[1]);
-                normals.push(orgN[2]);
-
-                uvs.push(orgU[0]);
-                uvs.push(orgU[1]);
+                vertices.pushArray(orgV, 3);
+                normals.pushArray(orgN, 3);
+                uvs.pushArray(orgU, 2);
 
                 // new
                 indices.push(count);
@@ -519,6 +508,10 @@ void GeometryProxy::mergeVertexData()
                 // shared
                 indices.push((UInt32)idx);
             }
+
+            orgV += 3;
+            orgN += 3;
+            orgU += 2;
         }
 
         m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
@@ -528,38 +521,31 @@ void GeometryProxy::mergeVertexData()
         // vertices and normals
         ArrayFloat vertices, normals;
 
-        Float *orgV, *cmpV, *orgN, *cmpN;
-        Int32 idx = -1, p, count = 0;
+        Float *orgV = originalVertices.getData(), *cmpV;
+        Float *orgN = originalNormals.getData(), *cmpN;
+        Int32 idx = -1, count = 0;
 
         for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
-            p = i;
-
-            orgV = &originalVertices[p*3];
-            orgN = &originalNormals[p*3];
-
             idx = -1;
 
+            cmpV = vertices.getData();
+            cmpN = normals.getData();
             for (Int32 j = 0; j < count; ++j) {
-                cmpV = &vertices[j*3];
-                cmpN = &normals[j*3];
-
                 if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2] &&
                     cmpN[0] == orgN[0] && cmpN[1] == orgN[1] && cmpN[2] == orgN[2]) {
                     // reuse index
                     idx = (Int32)j;
                     break;
                 }
+
+                cmpV += 3;
+                cmpN += 3;
             }
 
             // not found push
             if (idx == -1) {
-                vertices.push(orgV[0]);
-                vertices.push(orgV[1]);
-                vertices.push(orgV[2]);
-
-                normals.push(orgN[0]);
-                normals.push(orgN[1]);
-                normals.push(orgN[2]);
+                vertices.pushArray(orgV, 3);
+                normals.pushArray(orgN, 3);
 
                 // new
                 indices.push(count);
@@ -568,6 +554,9 @@ void GeometryProxy::mergeVertexData()
                 // shared
                 indices.push((UInt32)idx);
             }
+
+            orgV += 3;
+            orgN += 3;
         }
 
         m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
@@ -575,30 +564,26 @@ void GeometryProxy::mergeVertexData()
     } else {
         // vertices only
         ArrayFloat vertices;
-        Float *orgV, *cmpV;
-        Int32 idx = -1, p, count = 0;
+        Float *orgV = originalVertices.getData(), *cmpV;
+        Int32 idx = -1, count = 0;
 
         for (UInt32 i = 0; i < m_toOldVertices.getSize(); ++i) {
-            p = i;
-
-            orgV = &originalVertices[p*3];
             idx = -1;
 
+            cmpV = vertices.getData();
             for (Int32 j = 0; j < count; ++j) {
-                cmpV = &vertices[j*3];
-
                 if (cmpV[0] == orgV[0] && cmpV[1] == orgV[1] && cmpV[2] == orgV[2]) {
                     // reuse index
                     idx = j;
                     break;
                 }
+
+                cmpV += 3;
             }
 
             // not found push
             if (idx == -1) {
-                vertices.push(orgV[0]);
-                vertices.push(orgV[1]);
-                vertices.push(orgV[2]);
+                vertices.pushArray(orgV, 3);
 
                 // new
                 indices.push(count);
@@ -607,6 +592,8 @@ void GeometryProxy::mergeVertexData()
                 // shared
                 indices.push((UInt32)idx);
             }
+
+            orgV += 3;
         }
 
         m_vertexData[DATA_VERTICES] = SmartArrayFloat(vertices.getData(), vertices.getSize());
