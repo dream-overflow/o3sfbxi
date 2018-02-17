@@ -264,7 +264,7 @@ void Loader::load()
                             meshProxy->setGeometry(geometryProxy);
                         }
                     } else if (childType == ObjectProxy::OBJECT_MATERIAL) {
-                        MaterialProxy* materialProxy = static_cast<MaterialProxy*>(materialProxy);
+                        MaterialProxy* materialProxy = static_cast<MaterialProxy*>(childProxy);
                         MeshModelProxy* meshProxy = static_cast<MeshModelProxy*>(parentProxy);
 
                         meshProxy->addMaterial(materialProxy);

@@ -23,6 +23,46 @@ TextureProxy::TextureProxy(FBXNode *node) :
         O3D_ERROR(E_InvalidParameter("Must be a Texture node"));
     }
 
-    // @todo check Version == 100
+    FBXNode *version = m_node->child("Version");
+    if (version) {
+        m_version = version->directAsInt32();
+    }
+
+    if (m_version != 202) {
+        O3D_ERROR(E_InvalidParameter("Must be a Model node version 202"));
+    }
+
+    // TextureName
+    // Properties70
+    // Media
+    // ModelUVTranslation
+    // ModelUVScaling
+    // Texture_Alpha_Source
+    // Cropping
+
     m_objectType = OBJECT_TEXTURE;
+}
+
+o3d::String TextureProxy::relativeFilename()
+{
+    String filename;
+
+    FBXNode *relativeFilenameNode = m_node->child("RelativeFilename");
+    if (relativeFilenameNode) {
+        filename = relativeFilenameNode->directAsString();
+    }
+
+    return filename;
+}
+
+o3d::String TextureProxy::filename()
+{
+    String filename;
+
+    FBXNode *fileNameNode = m_node->child("FileName");
+    if (fileNameNode) {
+        filename = fileNameNode->directAsString();
+    }
+
+    return filename;
 }

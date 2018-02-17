@@ -39,6 +39,8 @@ public:
     void setTexture(MapType map, TextureProxy *texture);
     TextureProxy* texture(MapType map);
 
+    Bool hasTexture(MapType map) const;
+
 protected:
 
     TextureProxy *m_textures[MAP_NORMAL+1];

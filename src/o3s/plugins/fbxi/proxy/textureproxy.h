@@ -25,6 +25,16 @@ public:
      * @param node Node named Texture
      */
     TextureProxy(FBXNode *node);
+
+    /**
+     * @brief Texture filename.
+     */
+    String filename();
+
+    /**
+     * @brief Texture relative path and filename.
+     */
+    String relativeFilename();
 };
 
 } // namespace fbxi

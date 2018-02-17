@@ -7,6 +7,8 @@
  */
 
 #include "meshproxy.h"
+#include "materialproxy.h"
+
 #include <o3d/core/debug.h>
 
 #include "../property/propertystring.h"
@@ -23,7 +25,15 @@ MeshNodeProxy::MeshNodeProxy(FBXNode *node) :
         O3D_ERROR(E_InvalidParameter("Must be sub class mesh"));
     }
 
-    // @todo check Version == 100
+    FBXNode *version = m_node->child("Version");
+    if (version) {
+        m_version = version->directAsInt32();
+    }
+
+    if (m_version != 100) {
+        O3D_ERROR(E_InvalidParameter("Must be a Model node version 100"));
+    }
+
     m_objectType = OBJECT_MESH_NODE_ATTR;
 }
 
@@ -35,7 +45,15 @@ MeshModelProxy::MeshModelProxy(FBXNode *node) :
         O3D_ERROR(E_InvalidParameter("Must be sub class mesh"));
     }
 
-    // @todo check Version == 100
+    FBXNode *version = m_node->child("Version");
+    if (version) {
+        m_version = version->directAsInt32();
+    }
+
+    if (m_version != 232) {
+        O3D_ERROR(E_InvalidParameter("Must be a Model node version 232"));
+    }
+
     m_objectType = OBJECT_MESH_MODEL;
 }
 

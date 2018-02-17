@@ -184,7 +184,13 @@ o3d::Bool O3SAdapter::toScene()
             // materials and textures
             //
 
-            // @todo
+            for (UInt32 i = 0; i < proxy->numMaterials(); ++i) {
+                MaterialProxy *materialProxy = proxy->material(i);
+                if (materialProxy->hasTexture(MaterialProxy::MAP_DIFFUSE)) {
+                    // @todo with material hub
+                    meshHub->setDiffuseMap(m_def->basePath() + '/' + materialProxy->texture(MaterialProxy::MAP_DIFFUSE)->relativeFilename());
+                }
+            }
 
             spacialHub->addHub(meshHub);
         } else if (currentProxy->objectType() == ObjectProxy::OBJECT_CAMERA_MODEL) {

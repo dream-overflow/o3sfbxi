@@ -34,7 +34,7 @@ o3d::studio::common::ImporterOption *Importer::buildOptions()
 o3d::studio::common::ImportDefinition *Importer::introspect(const o3d::String &filename)
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
-    FbxImportDefinition *def = new FbxImportDefinition();
+    FbxImportDefinition *def = new FbxImportDefinition(File(filename).getFilePath());
 
     Parser *parser = new Parser(inStream);
     Bool result = parser->parse();
@@ -58,7 +58,7 @@ o3d::studio::common::ImportDefinition *Importer::import(const o3d::String &filen
         common::Hub *parent)
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
-    FbxImportDefinition *def = new FbxImportDefinition();
+    FbxImportDefinition *def = new FbxImportDefinition(File(filename).getFilePath());
 
     Parser *parser = new Parser(inStream);
     Bool result = parser->parse();
@@ -82,9 +82,20 @@ o3d::studio::common::ImportDefinition *Importer::import(const o3d::String &filen
     }
 }
 
+FbxImportDefinition::FbxImportDefinition(const o3d::String &basePath) :
+    m_basePath(basePath)
+{
+
+}
+
 FbxImportDefinition::~FbxImportDefinition()
 {
 
+}
+
+o3d::String FbxImportDefinition::basePath() const
+{
+    return m_basePath;
 }
 
 o3d::String FbxImportDefinition::creator() const

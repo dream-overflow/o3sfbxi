@@ -24,7 +24,15 @@ MaterialProxy::MaterialProxy(FBXNode *node) :
         O3D_ERROR(E_InvalidParameter("Must be a Material node"));
     }
 
-    // @todo check Version == 100
+    FBXNode *version = m_node->child("Version");
+    if (version) {
+        m_version = version->directAsInt32();
+    }
+
+    if (m_version != 102) {
+        O3D_ERROR(E_InvalidParameter("Must be a Model node version 102"));
+    }
+
     m_objectType = OBJECT_MATERIAL;
 
     for (UInt32 i = 0; i < MAP_NORMAL+1; ++i) {
@@ -40,4 +48,9 @@ void MaterialProxy::setTexture(MaterialProxy::MapType map, TextureProxy *texture
 TextureProxy *MaterialProxy::texture(MaterialProxy::MapType map)
 {
     return m_textures[map];
+}
+
+o3d::Bool MaterialProxy::hasTexture(MaterialProxy::MapType map) const
+{
+    return m_textures[map] != nullptr;
 }
