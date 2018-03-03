@@ -66,7 +66,7 @@ o3d::Vector3 ModelProxy::rotation()
 
 o3d::Vector3 ModelProxy::scale()
 {
-    Vector3 scale;  
+    Vector3 scale(1,1,1);
     FBXNode *p70 = m_node->child("Properties70");
     if (p70) {
         FBXNode *vNode = p70->child("Lcl Scaling");
