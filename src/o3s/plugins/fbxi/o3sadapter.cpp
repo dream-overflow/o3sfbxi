@@ -157,6 +157,7 @@ o3d::Bool O3SAdapter::toScene()
 
             if (parentHub) {
                 parentHub->addHub(spacialHub);
+                spacialHub->create();
             }
 
             // store for lookup
@@ -193,6 +194,8 @@ o3d::Bool O3SAdapter::toScene()
             }
 
             spacialHub->addHub(meshHub);
+            meshHub->create();
+
         } else if (currentProxy->objectType() == ObjectProxy::OBJECT_CAMERA_MODEL) {
             CameraModelProxy *proxy = static_cast<CameraModelProxy*>(currentProxy);
             common::SpacialNodeHub *spacialHub = static_cast<common::SpacialNodeHub*>(spacialNodeComponent->buildHub(
@@ -207,6 +210,7 @@ o3d::Bool O3SAdapter::toScene()
 
             if (parentHub) {
                 parentHub->addHub(spacialHub);
+                spacialHub->create();
             }
 
             // store for lookup
@@ -220,6 +224,8 @@ o3d::Bool O3SAdapter::toScene()
             // @todo camera settings
 
             spacialHub->addHub(cameraHub);
+            cameraHub->create();
+
         } else if (currentProxy->objectType() == ObjectProxy::OBJECT_LIGHT_MODEL) {
             // @todo need light hub           
             // @todo light type and parameters
