@@ -9,6 +9,8 @@
 #include "o3sadapter.h"
 #include "loader.h"
 
+#include <algorithm>
+
 #include "proxy/headerproxy.h"
 #include "proxy/definitionsproxy.h"
 #include "proxy/objectsproxy.h"
@@ -212,9 +214,11 @@ o3d::Bool O3SAdapter::toScene()
 
                     // @todo with material hub
                     if (found) {
-                        meshHub->setDiffuseMap(fileInfo.getFullFileName());
-                    } else {
-                        // meshHub->setDiffuseMap(...) @todo use the default 2D texture
+                        // @todo for now ignore unsupported by engine formats
+                        const auto allowed = std::list<String>({"png", "tga", "bmp", "dds", "jpg", "jpeg"});
+                        if (std::find(allowed.begin(), allowed.end(), fileInfo.getFileExt()) != allowed.cend()) {
+                            meshHub->setDiffuseMap(fileInfo.getFullFileName());
+                        }
                     }
                 }
             }
