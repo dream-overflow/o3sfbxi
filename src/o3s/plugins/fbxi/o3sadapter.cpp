@@ -33,6 +33,8 @@
 #include "property/propertyint64.h"
 #include "property/propertystring.h"
 
+#include <o3d/core/file.h>
+
 #include <o3d/studio/common/objectref.h>
 #include <o3d/studio/common/application.h>
 
@@ -188,8 +190,32 @@ o3d::Bool O3SAdapter::toScene()
             for (UInt32 i = 0; i < proxy->numMaterials(); ++i) {
                 MaterialProxy *materialProxy = proxy->material(i);
                 if (materialProxy->hasTexture(MaterialProxy::MAP_DIFFUSE)) {
+                    // is file exists else use a default texture
+                    Bool found = False;
+
+                    o3d::File fileInfo(materialProxy->texture(MaterialProxy::MAP_DIFFUSE)->relativeFilename());
+                    if (fileInfo.isAbsolute()) {
+                        found = fileInfo.exists();
+                    } else {
+                        // try with a relative path
+                        fileInfo = File(m_def->basePath() + '/' + materialProxy->texture(MaterialProxy::MAP_DIFFUSE)->relativeFilename());
+                        if (fileInfo.exists()) {
+                            found = True;
+                        } else {
+                            // last chance with filename
+                            fileInfo = File(m_def->basePath() + '/' + materialProxy->texture(MaterialProxy::MAP_DIFFUSE)->filename());
+                            if (fileInfo.exists()) {
+                                found = True;
+                            }
+                        }
+                    }
+
                     // @todo with material hub
-                    meshHub->setDiffuseMap(m_def->basePath() + '/' + materialProxy->texture(MaterialProxy::MAP_DIFFUSE)->relativeFilename());
+                    if (found) {
+                        meshHub->setDiffuseMap(fileInfo.getFullFileName());
+                    } else {
+                        // meshHub->setDiffuseMap(...) @todo use the default 2D texture
+                    }
                 }
             }
 

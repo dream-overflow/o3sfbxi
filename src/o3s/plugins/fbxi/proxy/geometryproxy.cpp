@@ -203,7 +203,7 @@ o3d::Bool GeometryProxy::processGeometry()
             }
         } else {
             if (mapTypeName != "AllSame") {
-                O3D_ERROR(E_InvalidFormat(String("Mapping of Materials data is not supported")));
+                // O3D_ERROR(E_InvalidFormat(String("Mapping of Materials data is not supported")));
             }
         }
     }
@@ -397,7 +397,7 @@ void GeometryProxy::mergeVertexData()
 {
     // need to refine vertex data because of doubled vertices during triangulation
     // it is a brut force approch in O(N^2)
-#if 1
+#if 0
     // originals arrays
     SmartArrayFloat originalVertices = m_vertexData[DATA_VERTICES];
     SmartArrayFloat originalColors = m_vertexData[DATA_COLORS];

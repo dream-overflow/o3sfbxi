@@ -19,6 +19,7 @@ Importer::Importer() :
     common::Importer()
 {
     m_name = "o3s::plugin::importer::fbxi";
+    m_exts = "AutoDesk FBX (*.fbx)";
 }
 
 Importer::~Importer()
@@ -26,12 +27,12 @@ Importer::~Importer()
 
 }
 
-o3d::studio::common::ImporterOption *Importer::buildOptions()
+o3d::studio::common::ImporterOption *Importer::buildOptions() const
 {
     return nullptr;
 }
 
-o3d::studio::common::ImportDefinition *Importer::introspect(const o3d::String &filename)
+o3d::studio::common::ImportDefinition *Importer::introspect(const o3d::String &filename) const
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
     FbxImportDefinition *def = new FbxImportDefinition(File(filename).getFilePath());
@@ -55,7 +56,7 @@ o3d::studio::common::ImportDefinition *Importer::introspect(const o3d::String &f
 
 o3d::studio::common::ImportDefinition *Importer::import(const o3d::String &filename,
         common::ImporterOption *options,
-        common::Hub *parent)
+        common::Hub *parent) const
 {
     InStream *inStream = o3d::FileManager::instance()->openInStream(filename);
     FbxImportDefinition *def = new FbxImportDefinition(File(filename).getFilePath());

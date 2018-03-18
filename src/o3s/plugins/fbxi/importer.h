@@ -72,12 +72,12 @@ public:
     Importer();
     virtual ~Importer();
 
-    virtual common::ImporterOption* buildOptions() override;
-    virtual common::ImportDefinition* introspect(const String &filename) override;
+    virtual common::ImporterOption* buildOptions() const override;
+    virtual common::ImportDefinition* introspect(const String &filename) const override;
     virtual common::ImportDefinition* import(
             const String &filename,
             common::ImporterOption *options,
-            common::Hub *parent) override;
+            common::Hub *parent) const override;
 };
 
 } // namespace fbxi
