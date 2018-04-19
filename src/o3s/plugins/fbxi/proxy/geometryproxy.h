@@ -34,7 +34,9 @@ public:
     {
         BY_POLYGON_VERTEX,
         BY_POLYGON,
-        BY_VERTEX
+        BY_VERTEX,
+        BY_EDGE,
+        ALL_SAME
     };
 
     /**

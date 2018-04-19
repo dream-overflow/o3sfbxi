@@ -354,6 +354,12 @@ o3d::Bool GeometryProxy::readVertexData(
         mapType = BY_POLYGON;
     } else if (mapTypeName == "ByVertice" || mapTypeName == "ByVertex") {
         mapType = BY_VERTEX;
+    } else if (mapTypeName == "ByEdge") {
+        mapType = BY_EDGE;
+    } else if (mapTypeName == "AllSame") {
+        mapType = ALL_SAME;
+    } else {
+        O3D_ERROR(E_InvalidFormat(String("Unknown vertex data mapping type {0}").arg(mapTypeName)));
     }
 
     FBXNode *referenceInformationType = node->child("ReferenceInformationType");
@@ -800,10 +806,16 @@ static void splatVertexData(
                 }
             }
         }
-    } else {
+    } else if (mapType == GeometryProxy::ALL_SAME) {
+        // mostly used by material id or color (no way on others data)
+        // @todo
         using o3d::Debug;
         using o3d::Logger;
-        O3D_ERROR(o3d::E_InvalidFormat("Unsupported vertex data mapping type"));
+        O3D_WARNING("Not yet implemented");
+    } else if (mapType == GeometryProxy::BY_EDGE) {
+        using o3d::Debug;
+        using o3d::Logger;
+        O3D_ERROR(o3d::E_InvalidFormat("Unsupported vertex data mapping by edge"));
     }
 }
 
